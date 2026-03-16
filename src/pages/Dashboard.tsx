@@ -1,9 +1,29 @@
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, PenLine, BarChart3, BookOpen, Brain, ArrowRight } from "lucide-react";
+import { MessageCircle, PenLine, BarChart3, BookOpen, Brain, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
+  // Fetch autorregistros from Supabase
+  const { data: logs, isLoading } = useQuery({
+    queryKey: ['autorregistros'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('autorregistros')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 5000, // Polling cada 5 segundos para ver registros nuevos del bot
+  });
 
   const cards = [
     {
@@ -37,7 +57,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="px-4 pt-6 space-y-6">
+    <div className="px-4 pt-6 pb-20 space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -64,7 +84,7 @@ const Dashboard = () => {
         <p className="text-xs font-medium opacity-80">Resumen semanal</p>
         <div className="flex items-baseline gap-4 mt-1">
           <div>
-            <span className="text-2xl font-bold">5</span>
+            <span className="text-2xl font-bold">{logs?.length || 0}</span>
             <span className="text-xs ml-1 opacity-80">registros</span>
           </div>
           <div>
@@ -112,32 +132,47 @@ const Dashboard = () => {
         transition={{ duration: 0.2, delay: 0.25 }}
         className="space-y-2"
       >
-        <h2 className="text-sm font-semibold text-foreground">Últimos registros</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">Últimos registros</h2>
+          {isLoading && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
+        </div>
+        
         <div className="space-y-2">
-          {[
-            { emotion: "Ansiedad", intensity: 7, time: "Hace 2h", conduct: "Evitación" },
-            { emotion: "Tristeza", intensity: 4, time: "Ayer", conduct: "Aislamiento" },
-            { emotion: "Calma", intensity: 3, time: "Hace 2 días", conduct: "Meditación" },
-          ].map((log, i) => (
-            <div key={i} className="herbie-card p-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    log.intensity >= 7
-                      ? "bg-destructive"
-                      : log.intensity >= 4
-                      ? "bg-[hsl(45,93%,47%)]"
-                      : "bg-secondary"
-                  }`}
-                />
-                <div>
-                  <p className="text-sm font-medium text-card-foreground">{log.emotion}</p>
-                  <p className="text-xs text-muted-foreground">{log.conduct} · {log.time}</p>
+          {logs && logs.length > 0 ? (
+            logs.map((log, i) => {
+              const intensity = log.data.intensity || 5;
+              const emotion = log.data.emotion || "Registro";
+              const time = formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: es });
+              
+              return (
+                <div key={log.id} className="herbie-card p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        intensity >= 7
+                          ? "bg-destructive"
+                          : intensity >= 4
+                          ? "bg-[hsl(45,93%,47%)]"
+                          : "bg-secondary"
+                      }`}
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-card-foreground capitalize">{emotion}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {log.data.conduct || "Sin conducta"} · {time}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-semibold text-muted-foreground">{intensity}</span>
                 </div>
-              </div>
-              <span className="text-lg font-semibold text-muted-foreground">{log.intensity}</span>
+              );
+            })
+          ) : !isLoading ? (
+            <div className="text-center py-8 border-2 border-dashed border-muted rounded-2xl">
+              <p className="text-xs text-muted-foreground">No hay registros todavía.</p>
+              <p className="text-[10px] text-muted-foreground mt-1">¡Prueba a mandarle un audio a Herbie!</p>
             </div>
-          ))}
+          ) : null}
         </div>
       </motion.div>
     </div>
