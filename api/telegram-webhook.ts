@@ -88,9 +88,19 @@ bot.on('voice', async (ctx) => {
 
 // Endpoint principal para Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'POST') {
-    await bot.handleUpdate(req.body);
-    return res.status(200).send('OK');
+  console.log('--- Incoming Webhook ---');
+  console.log('Method:', req.method);
+  console.log('Body:', JSON.stringify(req.body, null, 2));
+
+  try {
+    if (req.method === 'POST') {
+      await bot.handleUpdate(req.body);
+      console.log('Update handled successfully');
+      return res.status(200).send('OK');
+    }
+    return res.status(200).send('Herbie Bot is running!');
+  } catch (err) {
+    console.error('CRITICAL ERROR:', err);
+    return res.status(500).json({ error: 'Internal Error', details: String(err) });
   }
-  return res.status(200).send('Herbie Bot is running!');
 }
