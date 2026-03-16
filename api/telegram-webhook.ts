@@ -101,7 +101,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Update handled successfully');
       return res.status(200).send('OK');
     }
-    return res.status(200).send('Herbie Bot is running!');
+    return res.status(200).json({
+      status: 'Herbie Bot is running!',
+      env: {
+        TELEGRAM_BOT_TOKEN: !!process.env.TELEGRAM_BOT_TOKEN,
+        OPENAI_API_KEY: !!process.env.OPENAI_API_KEY,
+        SUPABASE_URL: !!process.env.SUPABASE_URL,
+        SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      },
+      webhook: req.body ? 'has_body' : 'no_body'
+    });
   } catch (err) {
     console.error('CRITICAL ERROR:', err);
     return res.status(500).json({ error: 'Internal Error', details: String(err) });
