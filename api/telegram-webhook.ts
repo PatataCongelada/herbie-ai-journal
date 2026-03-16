@@ -56,6 +56,9 @@ async function processAndSave(text: string, ctx: any) {
 // Handler para el comando /start
 bot.start((ctx) => ctx.reply('¡Hola! Soy Herbie, tu asistente clínico. Puedes enviarme una nota de voz o escribirme cómo te sientes para registrarlo en tu diario.'));
 
+// Handler de prueba
+bot.command('ping', (ctx) => ctx.reply('pong 🏓'));
+
 // Lógica para mensajes de texto
 bot.on('text', async (ctx) => {
   if (ctx.message.text.startsWith('/')) return; // Ignorar otros comandos
