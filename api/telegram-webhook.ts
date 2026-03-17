@@ -27,7 +27,7 @@ Tu objetivo es ayudar al usuario a realizar autorregistros clínicos de calidad.
 REGLAS DE INTERACCIÓN:
 1. Responde siempre con empatía y validación clínica.
 2. Si el usuario te da una emoción pero falta la intensidad (0-10), pídela amablemente.
-3. Si falta información importante (pensamiento, qué hizo, etc.), intenta profundizar brevemente.
+3. Si el usuario se refiere a un momento pasado (ej: "ayer", "hace un rato"), intenta capturar la fecha/hora aproximada.
 4. Si el usuario indica que no quiere registrar nada, "cancela", o "para", respeta su decisión.
 5. Mantén tus respuestas naturales y conversacionales.
 
@@ -39,17 +39,20 @@ Debes responder SIEMPRE con este esquema exacto:
     "intensity": number | null, 
     "thought": string | null, 
     "conduct": string | null, 
+    "event_date": string | null, // Fecha si el usuario la menciona (ej: "ayer") en formato ISO o descriptivo
     "is_final": boolean, 
     "should_cancel": boolean 
   } 
 }
 
 - is_final: true solo cuando tengas al menos emoción e intensidad Y el usuario parezca haber terminado esa entrada.
-- should_cancel: true si el usuario pide cancelar o dejar de registrar.`;
+- should_cancel: true si el usuario pide cancelar o dejar de registrar.
+- Contexto temporal: La fecha de hoy es ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`;
 
 // Función auxiliar para procesar con Gemini y manejar sesiones
 async function processAndSave(parts: any[], ctx: any) {
   const telegramId = ctx.from?.id;
+  const messageTimestamp = ctx.message?.date ? new Date(ctx.message.date * 1000).toISOString() : new Date().toISOString();
   if (!telegramId) return;
 
   try {
@@ -94,7 +97,7 @@ async function processAndSave(parts: any[], ctx: any) {
 
     let isFinal = false;
     let shouldCancel = false;
-    let extractedData = null;
+    let extractedData: any = null;
 
     if (jsonText) {
       try {
@@ -112,10 +115,15 @@ async function processAndSave(parts: any[], ctx: any) {
       // Limpiar sesión
       await supabase.from('bot_sessions').delete().eq('telegram_id', telegramId);
     } else if (isFinal && extractedData && (extractedData.emotion || extractedData.intensity)) {
-      // Guardar registro final
+      // Guardar registro final con timestamp del mensaje original
+      const finalData = {
+        ...extractedData,
+        recorded_at: messageTimestamp
+      };
+
       const { error: logError } = await supabase
         .from('autorregistros')
-        .insert([{ data: extractedData }]);
+        .insert([{ data: finalData }]);
       
       if (logError) throw logError;
       

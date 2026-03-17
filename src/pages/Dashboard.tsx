@@ -171,7 +171,7 @@ const Dashboard = () => {
                     <div>
                       <p className="text-sm font-medium text-card-foreground capitalize">{emotion}</p>
                       <p className="text-xs text-muted-foreground">
-                        {log.data.conduct || "Sin conducta"} · {time}
+                        {log.data.event_date ? `Suceso: ${log.data.event_date}` : (log.data.conduct || "Sin conducta")} · {time}
                       </p>
                     </div>
                   </div>
@@ -227,10 +227,17 @@ const Dashboard = () => {
 
               <div className="pt-2 border-t border-muted">
                 <p className="text-[10px] text-muted-foreground text-center">
-                  Registrado el {new Date(selectedLog.created_at).toLocaleString('es-ES', { 
-                    dateStyle: 'full', 
-                    timeStyle: 'short' 
-                  })}
+                  {selectedLog.data.recorded_at ? (
+                    `Mensaje enviado el ${new Date(selectedLog.data.recorded_at).toLocaleString('es-ES', { 
+                      dateStyle: 'full', 
+                      timeStyle: 'short' 
+                    })}`
+                  ) : (
+                    `Registrado el ${new Date(selectedLog.created_at).toLocaleString('es-ES', { 
+                      dateStyle: 'full', 
+                      timeStyle: 'short' 
+                    })}`
+                  )}
                 </p>
               </div>
             </div>
