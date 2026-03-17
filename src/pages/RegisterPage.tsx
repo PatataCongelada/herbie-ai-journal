@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Mic, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Mic, ExternalLink, Loader2, Sparkles } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -9,6 +9,8 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const { planId } = useParams();
   const [isSaving, setIsSaving] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [smartText, setSmartText] = useState("");
   const [form, setForm] = useState({
     emotion: "",
     intensity: 5,
@@ -16,6 +18,36 @@ const RegisterPage = () => {
     situation: "",
     thoughts: "",
   });
+
+  const handleSmartFill = async () => {
+    if (!smartText.trim()) return;
+    setIsExtracting(true);
+    try {
+      const response = await fetch('/api/extract-fields', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: smartText })
+      });
+      if (!response.ok) throw new Error("Error extrayendo datos");
+      const data = await response.json();
+      
+      setForm({
+        emotion: data.emotion || form.emotion,
+        intensity: data.intensity || form.intensity,
+        conduct: data.conduct || form.conduct,
+        situation: data.situation || form.situation,
+        thoughts: data.thoughts || form.thoughts,
+      });
+      
+      toast.success("Campos extraídos correctamente");
+      setSmartText("");
+    } catch (error) {
+      console.error("Error en Smart Fill:", error);
+      toast.error("No he podido extraer los datos. Intenta ser más descriptivo.");
+    } finally {
+      setIsExtracting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,11 +140,46 @@ const RegisterPage = () => {
             </div>
           </div>
         </div>
-        
         <div className="flex items-center gap-4 mt-8 mb-4">
           <div className="h-px bg-border flex-1" />
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            O registro manual
+            O auto-llenado inteligente
+          </span>
+          <div className="h-px bg-border flex-1" />
+        </div>
+
+        {/* Smart Fill Input */}
+        <div className="space-y-3 bg-muted/30 p-4 rounded-2xl border border-muted/50">
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-foreground">Auto-llenado Herbie</span>
+          </div>
+          <textarea
+            value={smartText}
+            onChange={(e) => setSmartText(e.target.value)}
+            placeholder="Ej: Ayer estaba en el metro y me dio mucha ansiedad (8) porque había gente gritando. Me bajé antes de tiempo."
+            rows={3}
+            className="w-full bg-background/50 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none border border-muted/20"
+          />
+          <button
+            type="button"
+            onClick={handleSmartFill}
+            disabled={isExtracting || !smartText.trim()}
+            className="w-full py-2.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+          >
+            {isExtracting ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <Sparkles className="w-3 h-3" />
+            )}
+            Extraer Datos Automáticamente
+          </button>
+        </div>
+
+        <div className="flex items-center gap-4 mt-8 mb-4">
+          <div className="h-px bg-border flex-1" />
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            O revisión manual
           </span>
           <div className="h-px bg-border flex-1" />
         </div>

@@ -8,14 +8,16 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  isExpert?: boolean;
 }
 
 const initialMessages: Message[] = [
   {
     id: "1",
     role: "assistant",
-    content: "Hola, soy HERBIE 👋 Tu asistente clínico basado en IA. Puedo ayudarte a consultar tu manual clínico activo. ¿En qué puedo ayudarte hoy?",
+    content: "Hola, soy el Cerebro Experto de Herbie 🧠 Clínicamente entrenado para ayudarte con tus manuales de Tomás Carrasco. ¿Qué duda técnica tienes hoy?",
     timestamp: new Date(),
+    isExpert: true
   },
 ];
 
@@ -30,7 +32,7 @@ const ChatPage = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -42,18 +44,40 @@ const ChatPage = () => {
     setInput("");
     setIsTyping(true);
 
-    // Simulated response
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/clinical-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMsg.content,
+          history: messages.slice(-10).map(m => ({ role: m.role, content: m.content }))
+        })
+      });
+
+      if (!response.ok) throw new Error("Error en la conexión con el experto");
+      
+      const data = await response.json();
+
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content:
-          "Según tu manual activo, esta técnica de exposición gradual es recomendable para situaciones de ansiedad social. Consulta la página 34 para ejercicios específicos.\n\n⚠️ *Nota: No emito diagnósticos. Solo sugerencias basadas en el manual activo.*",
+        content: data.text,
         timestamp: new Date(),
+        isExpert: true
       };
       setMessages((prev) => [...prev, botMsg]);
+    } catch (error: any) {
+      console.error("Error en chat experto:", error);
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "⚠️ Perdona, he tenido un problema conectando con mi base de conocimientos. ¿Puedes intentarlo de nuevo?",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -67,9 +91,9 @@ const ChatPage = () => {
           <Brain className="w-4 h-4 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h1 className="text-sm font-semibold text-foreground">HERBIE Chat</h1>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <BookOpen className="w-3 h-3" /> Sin manual activo
+          <h1 className="text-sm font-semibold text-foreground">Cerebro Experto ABA</h1>
+          <p className="text-xs text-muted-foreground flex items-center gap-1 italic">
+            <BookOpen className="w-3 h-3 text-primary" /> Modo Consulta Avanzada
           </p>
         </div>
         <button className="text-xs font-medium text-accent hover:underline">Cambiar Manual</button>
@@ -94,6 +118,11 @@ const ChatPage = () => {
                 }`}
               >
                 {msg.content}
+                {msg.isExpert && (
+                  <div className="mt-2 pt-2 border-t border-border/50 text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-1">
+                    <Brain className="w-3 h-3" /> Respuesta basada en manuales
+                  </div>
+                )}
               </div>
             </motion.div>
           ))}

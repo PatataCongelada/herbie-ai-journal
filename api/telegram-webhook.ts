@@ -20,6 +20,29 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Modelo optimizado para rapidez y gratuito
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+
+// Función para buscar conocimiento clínico en los manuales (RAG)
+async function getClinicalContext(query: string): Promise<string> {
+  try {
+    const result = await embeddingModel.embedContent(query);
+    const embedding = result.embedding.values;
+
+    const { data: matches, error } = await supabase.rpc('match_manual_knowledge', {
+      query_embedding: embedding,
+      match_threshold: 0.5,
+      match_count: 3,
+    });
+
+    if (error || !matches || matches.length === 0) return "";
+
+    return "\n\nCONTEXTO CLÍNICO RELEVANTE DE LOS MANUALES:\n" + 
+      matches.map((m: any) => `- ${m.content}`).join("\n");
+  } catch (err) {
+    console.error("Error en búsqueda semántica:", err);
+    return "";
+  }
+}
 
 const SYSTEM_PROMPT = `Eres Herbie, un asistente clínico empático y profesional. 
 Tu objetivo es ayudar al usuario a realizar autorregistros clínicos de calidad.
@@ -46,11 +69,15 @@ Debes responder SIEMPRE con este esquema exacto:
   } 
 }
 
-- Categorías de Plan: 
+- Respuesta natural: Responde de forma BREVE y empática (máximo 2 frases). Solo confirma los datos importantes (emoción, intensidad). No des lecciones a menos que el usuario pregunte.
+- Plan Categorization: 
   * 'activacion': Si habla de actividades, rutinas, falta de ganas o planes.
-  * 'rumia': Si habla de dar vueltas a la cabeza, pensamientos negativos o círculo vicioso.
+  * 'rumia': Si habla de dar vueltas a la cabeza, pensamientos o "rayadas".
   * 'meditacion': Si habla de relajación, respiración o estados físicos.
+  * 'aba': Si menciona conductas específicas, antecedentes o consecuencias claras.
   * Si no está claro, usa 'activacion' por defecto.
+
+- Experto Tomás Carrasco: Sé invisiblemente experto. Usa su enfoque para sintetizar la conducta en el JSON, pero en el chat mantente ágil y breve.
 
 - is_final: true solo cuando tengas al menos emoción e intensidad Y el usuario parezca haber terminado esa entrada.
 - should_cancel: true si el usuario pide cancelar o dejar de registrar.
@@ -81,10 +108,13 @@ async function processAndSave(parts: any[], ctx: any) {
       }
     }
 
-    // 2. Preparar contexto para Gemini (Prompt + Historia + Partes nuevas)
-    // Convertir historia a formato Gemini si es necesario, o simplemente texto
+    // 2. Buscar contexto clínico relevante (RAG)
+    const currentQuery = typeof parts[0] === 'string' ? parts[0] : "";
+    const manualContext = currentQuery ? await getClinicalContext(currentQuery) : "";
+
+    // 3. Preparar contexto para Gemini (Prompt + Historia + Contexto Manual + Partes nuevas)
     const contextualParts = [
-      SYSTEM_PROMPT,
+      SYSTEM_PROMPT + manualContext,
       ...history.map(m => `${m.role === 'user' ? 'Usuario' : 'Herbie'}: ${m.content}`),
       ...parts
     ];
