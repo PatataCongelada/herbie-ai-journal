@@ -21,34 +21,68 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // Modelo optimizado para rapidez y gratuito
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
-const SYSTEM_PROMPT = `Eres un asistente clínico experto. Tu objetivo es extraer datos estructurados de un autorregistro (voz o texto). 
-Genera un objeto JSON plano donde las claves representen los conceptos clínicos mencionados (ej: emotion, intensity, thought, conduct, etc.). 
-Sé preciso con la intensidad (0-10).
-Responde EXCLUSIVAMENTE con el JSON.`;
+const SYSTEM_PROMPT = `Eres Herbie, un asistente clínico empático y profesional. 
+Tu objetivo es ayudar al usuario a realizar autorregistros clínicos de calidad.
+
+REGLAS DE INTERACCIÓN:
+1. Responde siempre con empatía y validación clínica.
+2. Si el usuario te da una emoción pero falta la intensidad (0-10), pídela amablemente.
+3. Si falta información importante (pensamiento, qué hizo, etc.), intenta profundizar brevemente.
+4. Mantén tus respuestas naturales y conversacionales.
+
+FORMATO DE RESPUESTA (CRÍTICO):
+Debes responder SIEMPRE con este esquema exacto:
+[PARTE CONVERSACIONAL]
+{ "json_data": ... }
+
+Dentro del JSON, extrae: emotion, intensity (number), thought, conduct, intensity_after.
+Si no puedes extraer un campo, ponlo como null.
+
+Ejemplo:
+"Siento mucho que hayas tenido ese momento de ansiedad. ¿Qué intensidad dirías que tenía del 1 al 10?"
+{ "emotion": "ansiedad", "intensity": null, "thought": "no voy a poder", "conduct": "paralización" }`;
 
 // Función auxiliar para procesar con Gemini y guardar en Supabase
 async function processAndSave(parts: any[], ctx: any, originalText?: string) {
   try {
     const result = await model.generateContent([SYSTEM_PROMPT, ...parts]);
     const response = await result.response;
-    const jsonText = response.text().replace(/```json|```/g, '').trim();
+    const fullText = response.text().trim();
     
-    const extractedData = JSON.parse(jsonText);
+    // Separar respuesta natural del JSON
+    const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+    const naturalResponse = fullText.replace(/\{[\s\S]*\}/, "").trim();
+    const jsonText = jsonMatch ? jsonMatch[0] : null;
+    
+    // Responder al usuario con la parte natural
+    if (naturalResponse) {
+      await ctx.reply(naturalResponse);
+    }
 
-    // Guardar en Supabase
-    const { error } = await supabase
-      .from('autorregistros')
-      .insert([{ data: extractedData }]);
-
-    if (error) throw error;
-
-    const displayContent = originalText || "Nota de voz procesada";
-    await ctx.reply(`✅ Registro clínico guardado con éxito:\n\n"${displayContent}"`);
+    // Si hay JSON y tiene datos mínimos (ej: emoción o intensidad), guardar en Supabase
+    if (jsonText) {
+      try {
+        const extractedData = JSON.parse(jsonText);
+        
+        // Solo guardamos si hay algo sustancial (emoción o intensidad)
+        if (extractedData.emotion || extractedData.intensity) {
+          const { error } = await supabase
+            .from('autorregistros')
+            .insert([{ data: extractedData }]);
+          if (error) throw error;
+          
+          // No enviamos mensaje de "guardado" si es una conversación fluida, 
+          // a menos que sea una confirmación final.
+        }
+      } catch (e) {
+        console.error("Error al parsear JSON de Gemini:", e);
+      }
+    }
   } catch (err: any) {
     console.error('Error procesando registro:', err);
     let msg = `❌ Error: ${err.message || 'Error desconocido'}`;
     if (err.status === 429) {
-      msg = `⚠️ **Límite alcanzado:** Has llegado al límite de la versión gratuita de Gemini. Espera un momento antes de volver a intentarlo.`;
+      msg = `⚠️ **Límite alcanzado:** Has llegado al límite de la versión gratuita de Gemini. Espera un momento.`;
     }
     await ctx.reply(msg, { parse_mode: 'Markdown' });
   }
