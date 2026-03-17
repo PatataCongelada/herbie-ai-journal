@@ -94,11 +94,10 @@ bot.on('voice', async (ctx) => {
 
 // Endpoint principal para Vercel
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  try {
-    if (req.method === 'POST') {
-      await bot.handleUpdate(req.body);
-      return res.status(200).send('OK');
-    }
+  console.log('--- Incoming Webhook ---');
+  console.log('Method:', req.method);
+  
+  if (req.method === 'GET') {
     return res.status(200).json({
       status: 'Herbie Gemini Bot is running!',
       env: {
@@ -108,8 +107,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       }
     });
-  } catch (err) {
-    console.error('CRITICAL ERROR:', err);
-    return res.status(500).json({ error: 'Internal Error', details: String(err) });
+  }
+
+  try {
+    if (req.method === 'POST') {
+      console.log('Body:', JSON.stringify(req.body));
+      await bot.handleUpdate(req.body);
+      return res.status(200).send('OK');
+    }
+  } catch (err: any) {
+    console.error('SERVER ERROR:', err);
+    // Devolvemos 200 aunque haya error para que Telegram no siga reintentando 
+    // y bloqueando el bot, pero logueamos el fallo.
+    return res.status(200).send(`Error Handled: ${err.message}`);
   }
 }
