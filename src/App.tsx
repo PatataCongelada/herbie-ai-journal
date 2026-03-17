@@ -9,6 +9,7 @@ import ChatPage from "./pages/ChatPage";
 import RegisterPage from "./pages/RegisterPage";
 import StatsPage from "./pages/StatsPage";
 import SettingsPage from "./pages/SettingsPage";
+import PlanSelection from "./pages/PlanSelection";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,9 +21,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<PlanSelection />} />
           <Route element={<AppLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/dashboard/:planId" element={<Dashboard />} />
+            <Route path="/register/:planId" element={<RegisterPage />} />
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>

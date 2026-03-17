@@ -1,11 +1,14 @@
+import { ArrowLeft, Check, Mic, ExternalLink, Loader2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-import { ArrowLeft, Check, Mic, ExternalLink } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { planId } = useParams();
+  const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState({
     emotion: "",
     intensity: 5,
@@ -14,14 +17,37 @@ const RegisterPage = () => {
     thoughts: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.emotion.trim()) {
       toast.error("Ingresa una emoción");
       return;
     }
-    toast.success("Registro guardado correctamente");
-    setForm({ emotion: "", intensity: 5, conduct: "", situation: "", thoughts: "" });
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('autorregistros')
+        .insert([
+          { 
+            data: { 
+              ...form, 
+              plan: planId || 'general',
+              recorded_at: new Date().toISOString()
+            } 
+          }
+        ]);
+
+      if (error) throw error;
+
+      toast.success("Registro guardado correctamente");
+      navigate(`/dashboard/${planId}`);
+    } catch (error: any) {
+      console.error("Error al guardar:", error);
+      toast.error("Error al guardar el registro");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const intensityColor =
@@ -40,10 +66,10 @@ const RegisterPage = () => {
     <div className="px-4 pt-4 pb-20">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors">
+        <button onClick={() => navigate(`/dashboard/${planId}`)} className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted rounded-lg">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-semibold text-foreground">Nuevo Autorregistro</h1>
+        <h1 className="text-lg font-semibold text-foreground capitalize">Registro: {planId}</h1>
       </div>
 
       {/* Telegram Voice Banner */}
@@ -171,9 +197,14 @@ const RegisterPage = () => {
         {/* Submit */}
         <button
           type="submit"
+          disabled={isSaving}
           className="w-full bg-secondary text-secondary-foreground rounded-xl py-3.5 text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
         >
-          <Check className="w-4 h-4" />
+          {isSaving ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Check className="w-4 h-4" />
+          )}
           Guardar Registro
         </button>
       </motion.form>

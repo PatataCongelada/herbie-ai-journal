@@ -39,11 +39,18 @@ Debes responder SIEMPRE con este esquema exacto:
     "intensity": number | null, 
     "thought": string | null, 
     "conduct": string | null, 
-    "event_date": string | null, // Fecha si el usuario la menciona (ej: "ayer") en formato ISO o descriptivo
+    "event_date": string | null, 
+    "plan": "activacion" | "rumia" | "meditacion", // Selecciona el más adecuado
     "is_final": boolean, 
     "should_cancel": boolean 
   } 
 }
+
+- Categorías de Plan: 
+  * 'activacion': Si habla de actividades, rutinas, falta de ganas o planes.
+  * 'rumia': Si habla de dar vueltas a la cabeza, pensamientos negativos o círculo vicioso.
+  * 'meditacion': Si habla de relajación, respiración o estados físicos.
+  * Si no está claro, usa 'activacion' por defecto.
 
 - is_final: true solo cuando tengas al menos emoción e intensidad Y el usuario parezca haber terminado esa entrada.
 - should_cancel: true si el usuario pide cancelar o dejar de registrar.

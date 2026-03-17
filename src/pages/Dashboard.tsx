@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { MessageCircle, PenLine, BarChart3, BookOpen, Brain, ArrowRight, Loader2, Trash2 } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { MessageCircle, PenLine, BarChart3, BookOpen, Brain, ArrowRight, Loader2, Trash2, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -27,8 +27,17 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { planId } = useParams();
   const queryClient = useQueryClient();
   const [selectedLog, setSelectedLog] = useState<any>(null);
+
+  const planTitles: Record<string, string> = {
+    activacion: "Activación Conductual",
+    rumia: "Rumia",
+    meditacion: "Meditación",
+  };
+
+  const currentPlanTitle = planId ? planTitles[planId] || "Dashboard" : "Dashboard";
 
   // Mutation for deleting a record
   const deleteMutation = useMutation({
@@ -53,13 +62,19 @@ const Dashboard = () => {
 
   // Fetch autorregistros from Supabase
   const { data: logs, isLoading } = useQuery({
-    queryKey: ['autorregistros'],
+    queryKey: ['autorregistros', planId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('autorregistros')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(10);
+      
+      if (planId) {
+        query = query.eq('data->>plan', planId);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       return data;
@@ -80,7 +95,7 @@ const Dashboard = () => {
       description: "Nuevo autorregistro rápido",
       icon: PenLine,
       color: "bg-secondary/10 text-secondary",
-      action: () => navigate("/register"),
+      action: () => navigate(`/register/${planId}`),
     },
     {
       title: "Estadísticas",
@@ -105,15 +120,20 @@ const Dashboard = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
-        className="space-y-1"
+        className="space-y-4"
       >
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg herbie-gradient flex items-center justify-center">
-            <Brain className="w-4 h-4 text-primary-foreground" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate("/")} className="p-1 hover:bg-muted rounded-lg transition-colors">
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+            </button>
+            <div className="w-8 h-8 rounded-lg herbie-gradient flex items-center justify-center">
+              <Brain className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <h1 className="text-xl font-semibold text-foreground uppercase tracking-tight">{currentPlanTitle}</h1>
           </div>
-          <h1 className="text-xl font-semibold text-foreground">HERBIE</h1>
         </div>
-        <p className="text-sm text-muted-foreground">Tu asistente clínico IA</p>
+        <p className="text-sm text-muted-foreground">Gestiona tus progresos y registros clínicos</p>
       </motion.div>
 
       {/* Quick Stats Banner */}
