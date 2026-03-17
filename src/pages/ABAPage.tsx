@@ -9,7 +9,27 @@ interface Message {
   content: string;
   timestamp: Date;
   isExpert?: boolean;
+  isStreaming?: boolean;
 }
+
+const TypewriterText = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, 15); // Velocidad de escritura
+      return () => clearTimeout(timeout);
+    } else if (onComplete) {
+      onComplete();
+    }
+  }, [currentIndex, text, onComplete]);
+
+  return <>{displayedText}</>;
+};
 
 const ABAPage = () => {
   const navigate = useNavigate();
@@ -65,7 +85,8 @@ const ABAPage = () => {
         role: "assistant",
         content: data.text,
         timestamp: new Date(),
-        isExpert: true
+        isExpert: true,
+        isStreaming: true
       };
       setMessages((prev) => [...prev, botMsg]);
     } catch (error) {
@@ -148,7 +169,18 @@ const ABAPage = () => {
                     : "bg-card border border-border/50 rounded-tl-none text-foreground"
                 }`}
               >
-                {msg.content}
+                {msg.isStreaming ? (
+                  <TypewriterText 
+                    text={msg.content} 
+                    onComplete={() => {
+                      setMessages(prev => prev.map(m => 
+                        m.id === msg.id ? { ...m, isStreaming: false } : m
+                      ));
+                    }} 
+                  />
+                ) : (
+                  msg.content
+                )}
                 {msg.isExpert && (
                   <div className="mt-3 pt-2 border-t border-border/50 text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-1.5">
                     <BookOpen className="w-3 h-3" /> 
