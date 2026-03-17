@@ -12,7 +12,10 @@ if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-2.5-flash-lite",
+  systemInstruction: "" // Se actualizará en cada request
+});
 const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
 
 async function getClinicalContext(query: string, category: string, expert: string): Promise<string> {
@@ -72,9 +75,15 @@ Mantén un tono profesional, empático y estrictamente clínico.
 Contexto clínico:
 ${context}`;
 
-    const chat = model.startChat({
+    // 3. Configurar el modelo con las instrucciones específicas
+    const chatModel = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash-lite",
+      systemInstruction: systemPrompt 
+    });
+
+    const chat = chatModel.startChat({
       history: messages.slice(0, -1).map((m: any) => ({
-        role: m.role,
+        role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }],
       })),
     });
