@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { MessageCircle, PenLine, BarChart3, BookOpen, Brain, ArrowRight, Loader2, Trash2, ArrowLeft } from "lucide-react";
+import { MessageCircle, PenLine, BarChart3, BookOpen, Brain, ArrowRight, Loader2, Trash2, ArrowLeft, BrainCircuit } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -105,11 +105,11 @@ const Dashboard = () => {
       action: () => navigate("/stats"),
     },
     {
-      title: "Manual Activo",
-      description: "Sube tu primer manual clínico",
-      icon: BookOpen,
+      title: "Análisis ABA",
+      description: "Analizar con Cerebro Experto",
+      icon: BrainCircuit,
       color: "bg-primary/10 text-primary",
-      action: () => navigate("/settings"),
+      action: () => navigate("/aba"),
     },
   ];
 

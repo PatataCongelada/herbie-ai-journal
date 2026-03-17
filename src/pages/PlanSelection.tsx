@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Brain, Sparkles, Zap, Moon } from "lucide-react";
+import { Brain, Sparkles, Zap, Moon, BrainCircuit } from "lucide-react";
 
 const PlanSelection = () => {
   const navigate = useNavigate();
@@ -82,6 +82,34 @@ const PlanSelection = () => {
             </motion.button>
           );
         })}
+      </div>
+
+      {/* Featured: ABA Expert */}
+      <div className="max-w-md mx-auto pt-4">
+        <motion.button
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          onClick={() => navigate("/aba")}
+          className="w-full relative group overflow-hidden rounded-3xl p-px bg-gradient-to-br from-primary/50 via-primary/20 to-transparent"
+        >
+          <div className="relative bg-card rounded-[23px] p-5 flex items-center gap-5 text-left transition-all duration-300 group-hover:bg-muted/50">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-primary/10 text-primary shadow-lg shadow-primary/5">
+              <BrainCircuit className="w-8 h-8" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-black text-card-foreground">
+                  Cerebro Experto ABA
+                </h3>
+                <span className="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Beta</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Análisis funcional de conducta avanzado. Descubre por qué haces lo que haces.
+              </p>
+            </div>
+          </div>
+        </motion.button>
       </div>
 
       {/* Optional: Summary or Insight */}

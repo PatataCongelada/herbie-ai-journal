@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { MessageCircle, PenLine, BarChart3, Settings } from "lucide-react";
+import { MessageCircle, PenLine, BarChart3, Settings, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 
 const navItems = [
   { path: "/", label: "Inicio", icon: MessageCircle },
+  { path: "/aba", label: "Cerebro ABA", icon: Activity },
   { path: "/register", label: "Registrar", icon: PenLine },
   { path: "/stats", label: "Stats", icon: BarChart3 },
   { path: "/settings", label: "Ajustes", icon: Settings },

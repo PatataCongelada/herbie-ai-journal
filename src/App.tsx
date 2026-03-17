@@ -10,6 +10,7 @@ import RegisterPage from "./pages/RegisterPage";
 import StatsPage from "./pages/StatsPage";
 import SettingsPage from "./pages/SettingsPage";
 import PlanSelection from "./pages/PlanSelection";
+import ABAPage from "./pages/ABAPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/register/:planId" element={<RegisterPage />} />
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/aba" element={<ABAPage />} />
           </Route>
           <Route path="/chat" element={<ChatPage />} />
           <Route path="*" element={<NotFound />} />
