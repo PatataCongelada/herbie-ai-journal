@@ -55,10 +55,7 @@ async function processAndSave(parts: any[], ctx: any, originalText?: string) {
 }
 
 // Handler para el comando /start
-bot.start((ctx) => ctx.reply('¡Hola! Soy Herbie (v2 Gemini), tu asistente clínico gratuito. Puedes enviarme una nota de voz o escribirme cómo te sientes.'));
-
-// Handler de prueba
-bot.command('ping', (ctx) => ctx.reply('pong 🏓 (Herbie is alive with Gemini)'));
+bot.start((ctx) => ctx.reply('¡Hola! Soy Herbie, tu asistente clínico. Puedes enviarme una nota de voz o escribirme cómo te sientes para registrarlo en tu diario.'));
 
 // Lógica para mensajes de texto
 bot.on('text', async (ctx) => {
