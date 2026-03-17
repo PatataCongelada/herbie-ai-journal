@@ -13,17 +13,23 @@ if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
-const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
 
-async function getClinicalContext(query: string): Promise<string> {
+async function getClinicalContext(query: string, category: string, expert: string): Promise<string> {
   try {
-    const result = await embeddingModel.embedContent(query);
+    // @ts-ignore
+    const result = await embeddingModel.embedContent({
+      content: { role: 'user', parts: [{ text: query }] },
+      outputDimensionality: 768
+    });
     const embedding = result.embedding.values;
 
     const { data: matches, error } = await supabase.rpc('match_manual_knowledge', {
       query_embedding: embedding,
       match_threshold: 0.5,
       match_count: 5, // Más contexto para el chat web
+      p_category: category === 'all' ? null : category,
+      p_expert: expert === 'all' ? null : expert
     });
 
     if (error || !matches || matches.length === 0) return "";
@@ -37,43 +43,44 @@ async function getClinicalContext(query: string): Promise<string> {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { message, history = [] } = req.body;
-
-  if (!message) {
-    return res.status(400).json({ error: 'Message is required' });
-  }
+  const { messages, category = 'general', expert = 'general' } = req.body;
+  const lastMessage = messages[messages.length - 1].content;
 
   try {
-    const context = await getClinicalContext(message);
+    // 1. Obtener contexto clínico filtrado
+    const context = await getClinicalContext(lastMessage, category, expert);
 
-    const systemPrompt = `Eres Herbie, un experto clínico avanzado especializado en Análisis de Conducta (ABA) y Terapias de Tercera Generación. 
-Tu objetivo es ayudar al terapeuta o al usuario a analizar casos basándote en los manuales de Tomás Carrasco y Joseph Cautela.
+    // 2. Personalizar el sistema según el experto
+    let expertInstructions = "";
+    if (expert === 'tomas') {
+      expertInstructions = "Tu personalidad es la de Tomás Carrasco. Eres pragmático, te enfocas en el análisis funcional riguroso y en la modificación de conducta directa.";
+    } else if (expert === 'froxan') {
+      expertInstructions = "Tu personalidad es la de María Xesús Froxán. Te enfocas en la psicología conductista radical, el análisis verbal y la precisión terminológica clínica.";
+    }
 
-REGLAS:
-1. Utiliza el CONTEXTO proporcionado de los manuales para responder con precisión técnica.
-2. Si la información no está en el contexto, usa tu conocimiento general pero indica que es una sugerencia general.
-3. Adopta el enfoque de Tomás Carrasco: profesional, analítico y centrado en la función de la conducta.
-4. Cita fragmentos si son relevantes.
-5. NO emitas diagnósticos médicos, solo análisis funcionales y sugerencias técnicas.
+    const systemPrompt = `Eres Herbie, un experto en Análisis de Conducta Aplicado (ABA) y psicología clínica. 
+${expertInstructions}
 
+Usa el siguiente contexto extraído de manuales clínicos para responder. 
+Si el contexto no contiene la respuesta, admítelo pero intenta razonar basándote en principios generales de ABA.
+Mantén un tono profesional, empático y estrictamente clínico.
+
+Contexto clínico:
 ${context}`;
 
     const chat = model.startChat({
-      history: history.map((h: any) => ({
-        role: h.role === 'user' ? 'user' : 'model',
-        parts: [{ text: h.content }],
+      history: messages.slice(0, -1).map((m: any) => ({
+        role: m.role,
+        parts: [{ text: m.content }],
       })),
     });
 
-    const result = await chat.sendMessage(message);
+    const result = await chat.sendMessage(lastMessage);
     const response = await result.response;
-    const text = response.text();
-
-    return res.status(200).json({ text });
+    
+    return res.status(200).json({ text: response.text() });
   } catch (error: any) {
     console.error('Error en clinical-chat:', error);
     return res.status(500).json({ error: error.message });

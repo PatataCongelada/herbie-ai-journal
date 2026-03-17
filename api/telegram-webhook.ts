@@ -20,12 +20,16 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Modelo optimizado para rapidez y gratuito
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
-const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
 
 // Función para buscar conocimiento clínico en los manuales (RAG)
 async function getClinicalContext(query: string): Promise<string> {
   try {
-    const result = await embeddingModel.embedContent(query);
+    // @ts-ignore
+    const result = await embeddingModel.embedContent({
+      content: { role: 'user', parts: [{ text: query }] },
+      outputDimensionality: 768
+    });
     const embedding = result.embedding.values;
 
     const { data: matches, error } = await supabase.rpc('match_manual_knowledge', {

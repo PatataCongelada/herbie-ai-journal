@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import pdf from 'pdf-parse';
+// @ts-ignore
+import pdf from 'pdf-parse/lib/pdf-parse.js';
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as dotenv from 'dotenv';
@@ -18,25 +19,63 @@ if (!supabaseUrl || !supabaseKey || !geminiKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 const genAI = new GoogleGenerativeAI(geminiKey);
-const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
 
 const MANUALS_DIR = './docs/manuals';
 
 async function ingest() {
-  const files = fs.readdirSync(MANUALS_DIR).filter(f => f.endsWith('.pdf'));
+  // Función recursiva para buscar PDFs
+  const getAllFiles = (dir: string): string[] => {
+    let results: string[] = [];
+    const list = fs.readdirSync(dir);
+    list.forEach(file => {
+      file = path.join(dir, file);
+      const stat = fs.statSync(file);
+      if (stat && stat.isDirectory()) {
+        results = results.concat(getAllFiles(file));
+      } else if (file.endsWith('.pdf')) {
+        results.push(file);
+      }
+    });
+    return results;
+  };
+
+  const files = getAllFiles(MANUALS_DIR);
 
   console.log(`📚 Encontrados ${files.length} manuales para procesar...`);
 
-  for (const file of files) {
-    const filePath = path.join(MANUALS_DIR, file);
-    console.log(`\n📄 Procesando: ${file}...`);
+  for (const filePath of files) {
+    const relativePath = path.relative(MANUALS_DIR, filePath);
+    const pathParts = relativePath.split(path.sep);
+    
+    // Suponemos estructura: expert/category/archivo.pdf
+    // O simplemente categoria/expert/archivo.pdf
+    // Vamos a ser flexibles: si hay subcarpetas, las mapeamos.
+    let expert = 'general';
+    let category = 'general';
+
+    if (pathParts.length >= 3) {
+      expert = pathParts[0].toLowerCase();
+      category = pathParts[1].toLowerCase();
+    } else if (pathParts.length === 2) {
+      // Si solo hay un nivel, asumimos que es el experto o la categoría
+      // Por simplicidad, si es 'teoria' o 'practica', es categoría.
+      const first = pathParts[0].toLowerCase();
+      if (['teoria', 'practica'].includes(first)) {
+        category = first;
+      } else {
+        expert = first;
+      }
+    }
+
+    const fileName = path.basename(filePath);
+    console.log(`\n📄 Procesando: ${fileName} [Expert: ${expert}, Category: ${category}]...`);
     
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdf(dataBuffer);
     const fullText = data.text;
 
-    // 1. Chunking (fragmentación)
-    // Dividimos por párrafos o bloques de ~1000 caracteres con solapamiento
+    // 1. Chunking
     const chunkSize = 1000;
     const overlap = 200;
     const chunks: string[] = [];
@@ -50,10 +89,17 @@ async function ingest() {
     // 2. Generar Embeddings y Subir
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
-      if (chunk.length < 20) continue; // Ignorar fragmentos muy cortos
+      if (chunk.length < 20) continue;
 
       try {
-        const result = await embeddingModel.embedContent(chunk);
+        // Delay para evitar 429
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // @ts-ignore
+        const result = await embeddingModel.embedContent({
+          content: { role: 'user', parts: [{ text: chunk }] },
+          outputDimensionality: 768
+        });
         const embedding = result.embedding.values;
 
         const { error } = await supabase
@@ -61,8 +107,11 @@ async function ingest() {
           .insert({
             content: chunk,
             embedding: embedding,
+            category: category,
+            expert: expert,
             metadata: {
-              source: file,
+              source: fileName,
+              full_path: relativePath,
               chunk_index: i,
               total_chunks: chunks.length
             }
@@ -70,14 +119,12 @@ async function ingest() {
 
         if (error) throw error;
         
-        if (i % 10 === 0) {
-          process.stdout.write('.'); // Progreso
-        }
+        if (i % 50 === 0) process.stdout.write('.');
       } catch (err) {
-        console.error(`\n❌ Error en fragmento ${i} de ${file}:`, err);
+        console.error(`\n❌ Error en fragmento ${i}:`, err);
       }
     }
-    console.log(`\n✅ ${file} completado.`);
+    console.log(`\n✅ ${fileName} completado.`);
   }
 
   console.log('\n✨ ¡Proceso de ingesta finalizado!');

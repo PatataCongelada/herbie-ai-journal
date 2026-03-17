@@ -24,6 +24,8 @@ const ABAPage = () => {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [selectedExpert, setSelectedExpert] = useState<'all' | 'tomas' | 'froxan'>('all');
+  const [selectedMode, setSelectedMode] = useState<'all' | 'teoria' | 'practica'>('all');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,8 +51,9 @@ const ABAPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userMsg.content,
-          history: messages.slice(-10).map(m => ({ role: m.role, content: m.content }))
+          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
+          category: selectedMode,
+          expert: selectedExpert
         })
       });
 
@@ -81,7 +84,6 @@ const ABAPage = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b bg-card/50 backdrop-blur-md sticky top-0 z-20">
         <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted rounded-lg">
           <ArrowLeft className="w-5 h-5" />
@@ -92,9 +94,62 @@ const ABAPage = () => {
           </h1>
           <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Análisis Funcional Activo</p>
         </div>
-        <div className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 rounded-full">
-          <Sparkles className="w-3 h-3 text-primary animate-pulse" />
-          <span className="text-[10px] font-bold text-primary">RAG-ON</span>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 bg-primary/10 rounded-full">
+            <Sparkles className="w-3 h-3 text-primary animate-pulse" />
+            <span className="text-[10px] font-bold text-primary">RAG-ON</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Control Center */}
+      <div className="bg-card border-b p-3 flex flex-wrap gap-4 items-center justify-center sm:justify-start overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase">Experto:</span>
+          <div className="flex bg-muted rounded-lg p-0.5">
+            {[
+              { id: 'all', label: 'Todos' },
+              { id: 'tomas', label: 'Tomás' },
+              { id: 'froxan', label: 'Froxán' }
+            ].map((e) => (
+              <button
+                key={e.id}
+                onClick={() => setSelectedExpert(e.id as any)}
+                className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${
+                  selectedExpert === e.id 
+                    ? "bg-background shadow-sm text-primary" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {e.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-4 w-px bg-border hidden sm:block" />
+
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase">Foco:</span>
+          <div className="flex bg-muted rounded-lg p-0.5">
+            {[
+              { id: 'all', label: 'Todo' },
+              { id: 'teoria', label: 'Teoría' },
+              { id: 'practica', label: 'Práctica' }
+            ].map((m) => (
+              <button
+                key={m.id}
+                onClick={() => setSelectedMode(m.id as any)}
+                className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${
+                  selectedMode === m.id 
+                    ? "bg-background shadow-sm text-primary" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -121,7 +176,8 @@ const ABAPage = () => {
                 {msg.content}
                 {msg.isExpert && (
                   <div className="mt-3 pt-2 border-t border-border/50 text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-1.5">
-                    <BookOpen className="w-3 h-3" /> Basado en Manuales de Tomás Carrasco
+                    <BookOpen className="w-3 h-3" /> 
+                    Contenido extraído de: {selectedExpert === 'all' ? 'Manuales Clínicos' : selectedExpert === 'tomas' ? 'Tomás Carrasco' : 'Froxán et al.'}
                   </div>
                 )}
               </div>
