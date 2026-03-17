@@ -5,9 +5,17 @@ import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [selectedLog, setSelectedLog] = useState<any>(null);
 
   // Fetch autorregistros from Supabase
   const { data: logs, isLoading } = useQuery({
@@ -145,7 +153,11 @@ const Dashboard = () => {
               const time = formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: es });
               
               return (
-                <div key={log.id} className="herbie-card p-3 flex items-center justify-between">
+                <div 
+                  key={log.id} 
+                  onClick={() => setSelectedLog(log)}
+                  className="herbie-card p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors"
+                >
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-2 h-2 rounded-full ${
@@ -175,6 +187,56 @@ const Dashboard = () => {
           ) : null}
         </div>
       </motion.div>
+
+      {/* Record Details Dialog */}
+      <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
+        <DialogContent className="max-w-[90vw] rounded-2xl sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-primary" />
+              Detalle del Registro
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedLog && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Emoción</p>
+                  <p className="text-xl font-bold capitalize">{selectedLog.data.emotion || "Registro"}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Intensidad</p>
+                  <p className="text-3xl font-black text-primary">{selectedLog.data.intensity || 0}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {Object.entries(selectedLog.data).map(([key, value]) => {
+                  if (key === 'intensity' || key === 'emotion') return null;
+                  return (
+                    <div key={key} className="space-y-1">
+                      <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{key}</p>
+                      <p className="text-sm text-foreground leading-relaxed bg-muted/20 p-2 rounded-lg border border-muted">
+                        {String(value)}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="pt-2 border-t border-muted">
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Registrado el {new Date(selectedLog.created_at).toLocaleString('es-ES', { 
+                    dateStyle: 'full', 
+                    timeStyle: 'short' 
+                  })}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
