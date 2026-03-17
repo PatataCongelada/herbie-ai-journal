@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.autorregistros (
 ALTER TABLE public.autorregistros ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Permitir lectura anónima" ON public.autorregistros FOR SELECT USING (true);
 CREATE POLICY "Permitir inserción anónima" ON public.autorregistros FOR INSERT WITH CHECK (true);
+CREATE POLICY "Permitir eliminación anónima" ON public.autorregistros FOR DELETE USING (true);
 
 -- Tabla para gestionar sesiones del bot (contexto y timeout)
 CREATE TABLE IF NOT EXISTS public.bot_sessions (

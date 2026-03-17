@@ -1,21 +1,55 @@
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, PenLine, BarChart3, BookOpen, Brain, ArrowRight, Loader2 } from "lucide-react";
+import { MessageCircle, PenLine, BarChart3, BookOpen, Brain, ArrowRight, Loader2, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedLog, setSelectedLog] = useState<any>(null);
+
+  // Mutation for deleting a record
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('autorregistros')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['autorregistros'] });
+      setSelectedLog(null);
+      toast.success("Registro eliminado correctamente");
+    },
+    onError: (error: any) => {
+      console.error("Error al eliminar:", error);
+      toast.error("Error al eliminar el registro. Verifica los permisos de Supabase.");
+    }
+  });
 
   // Fetch autorregistros from Supabase
   const { data: logs, isLoading } = useQuery({
@@ -239,6 +273,41 @@ const Dashboard = () => {
                     })}`
                   )}
                 </p>
+              </div>
+
+              <div className="pt-4">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      disabled={deleteMutation.isPending}
+                      className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-destructive/20 text-destructive hover:bg-destructive/5 transition-colors text-sm font-medium"
+                    >
+                      {deleteMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                      Eliminar registro
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="rounded-2xl max-w-[90vw] sm:max-w-md">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar este registro?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. Se borrará permanentemente de tu diario clínico.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex flex-row gap-2 sm:gap-0">
+                      <AlertDialogCancel className="flex-1 rounded-xl">Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteMutation.mutate(selectedLog.id)}
+                        className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
+                      >
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           )}
