@@ -19,7 +19,7 @@ const genAI = new GoogleGenerativeAI(geminiApiKey);
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Modelo optimizado para rapidez y gratuito
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
 const SYSTEM_PROMPT = `Eres un asistente clínico experto. Tu objetivo es extraer datos estructurados de un autorregistro (voz o texto). 
 Genera un objeto JSON plano donde las claves representen los conceptos clínicos mencionados (ej: emotion, intensity, thought, conduct, etc.). 
