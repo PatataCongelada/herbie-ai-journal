@@ -49,7 +49,13 @@ async function processAndSave(text: string, ctx: any) {
     await ctx.reply(`✅ Registro clínico guardado con éxito:\n\n"${text}"`);
   } catch (err: any) {
     console.error('Error procesando registro:', err);
-    await ctx.reply(`❌ Lo siento, hubo un fallo al procesar tu mensaje: ${err.message || 'Error desconocido'}`);
+    let msg = `❌ Error: ${err.message || 'Error desconocido'}`;
+    
+    if (err.status === 429) {
+      msg = `⚠️ **Error de OpenAI (429):** Esto suele significar que tu cuenta no tiene saldo o has llegado al límite de uso. Por favor, revisa tu balance en [platform.openai.com/settings/billing](https://platform.openai.com/settings/billing).`;
+    }
+    
+    await ctx.reply(msg, { parse_mode: 'Markdown' });
   }
 }
 
