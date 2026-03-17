@@ -28,61 +28,120 @@ REGLAS DE INTERACCIÓN:
 1. Responde siempre con empatía y validación clínica.
 2. Si el usuario te da una emoción pero falta la intensidad (0-10), pídela amablemente.
 3. Si falta información importante (pensamiento, qué hizo, etc.), intenta profundizar brevemente.
-4. Mantén tus respuestas naturales y conversacionales.
+4. Si el usuario indica que no quiere registrar nada, "cancela", o "para", respeta su decisión.
+5. Mantén tus respuestas naturales y conversacionales.
 
 FORMATO DE RESPUESTA (CRÍTICO):
 Debes responder SIEMPRE con este esquema exacto:
 [PARTE CONVERSACIONAL]
-{ "json_data": ... }
+{ "json_data": { 
+    "emotion": string | null, 
+    "intensity": number | null, 
+    "thought": string | null, 
+    "conduct": string | null, 
+    "is_final": boolean, 
+    "should_cancel": boolean 
+  } 
+}
 
-Dentro del JSON, extrae: emotion, intensity (number), thought, conduct, intensity_after.
-Si no puedes extraer un campo, ponlo como null.
+- is_final: true solo cuando tengas al menos emoción e intensidad Y el usuario parezca haber terminado esa entrada.
+- should_cancel: true si el usuario pide cancelar o dejar de registrar.`;
 
-Ejemplo:
-"Siento mucho que hayas tenido ese momento de ansiedad. ¿Qué intensidad dirías que tenía del 1 al 10?"
-{ "emotion": "ansiedad", "intensity": null, "thought": "no voy a poder", "conduct": "paralización" }`;
+// Función auxiliar para procesar con Gemini y manejar sesiones
+async function processAndSave(parts: any[], ctx: any) {
+  const telegramId = ctx.from?.id;
+  if (!telegramId) return;
 
-// Función auxiliar para procesar con Gemini y guardar en Supabase
-async function processAndSave(parts: any[], ctx: any, originalText?: string) {
   try {
-    const result = await model.generateContent([SYSTEM_PROMPT, ...parts]);
+    // 1. Obtener sesión actual
+    let history: any[] = [];
+    const { data: session } = await supabase
+      .from('bot_sessions')
+      .select('*')
+      .eq('telegram_id', telegramId)
+      .single();
+
+    const now = new Date();
+    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+
+    if (session) {
+      const lastMessageAt = new Date(session.last_message_at);
+      if (lastMessageAt > tenMinutesAgo) {
+        history = session.history || [];
+      }
+    }
+
+    // 2. Preparar contexto para Gemini (Prompt + Historia + Partes nuevas)
+    // Convertir historia a formato Gemini si es necesario, o simplemente texto
+    const contextualParts = [
+      SYSTEM_PROMPT,
+      ...history.map(m => `${m.role === 'user' ? 'Usuario' : 'Herbie'}: ${m.content}`),
+      ...parts
+    ];
+
+    const result = await model.generateContent(contextualParts);
     const response = await result.response;
     const fullText = response.text().trim();
     
-    // Separar respuesta natural del JSON
+    // 3. Parsear respuesta
     const jsonMatch = fullText.match(/\{[\s\S]*\}/);
     const naturalResponse = fullText.replace(/\{[\s\S]*\}/, "").trim();
     const jsonText = jsonMatch ? jsonMatch[0] : null;
     
-    // Responder al usuario con la parte natural
     if (naturalResponse) {
       await ctx.reply(naturalResponse);
     }
 
-    // Si hay JSON y tiene datos mínimos (ej: emoción o intensidad), guardar en Supabase
+    let isFinal = false;
+    let shouldCancel = false;
+    let extractedData = null;
+
     if (jsonText) {
       try {
-        const extractedData = JSON.parse(jsonText);
-        
-        // Solo guardamos si hay algo sustancial (emoción o intensidad)
-        if (extractedData.emotion || extractedData.intensity) {
-          const { error } = await supabase
-            .from('autorregistros')
-            .insert([{ data: extractedData }]);
-          if (error) throw error;
-          
-          // No enviamos mensaje de "guardado" si es una conversación fluida, 
-          // a menos que sea una confirmación final.
-        }
+        const parsed = JSON.parse(jsonText);
+        extractedData = parsed.json_data || parsed; // Soportar ambos formatos
+        isFinal = !!extractedData.is_final;
+        shouldCancel = !!extractedData.should_cancel;
       } catch (e) {
-        console.error("Error al parsear JSON de Gemini:", e);
+        console.error("Error parseando JSON:", e);
       }
     }
+
+    // 4. Manejar persistencia
+    if (shouldCancel) {
+      // Limpiar sesión
+      await supabase.from('bot_sessions').delete().eq('telegram_id', telegramId);
+    } else if (isFinal && extractedData && (extractedData.emotion || extractedData.intensity)) {
+      // Guardar registro final
+      const { error: logError } = await supabase
+        .from('autorregistros')
+        .insert([{ data: extractedData }]);
+      
+      if (logError) throw logError;
+      
+      // Limpiar sesión tras éxito
+      await supabase.from('bot_sessions').delete().eq('telegram_id', telegramId);
+    } else {
+      // Actualizar historia de la sesión
+      const newUserMsg = typeof parts[0] === 'string' ? parts[0] : "(Audio/Multimodal)";
+      const updatedHistory = [...history, { role: 'user', content: newUserMsg }];
+      if (naturalResponse) updatedHistory.push({ role: 'assistant', content: naturalResponse });
+      
+      // Mantener solo los últimos 6 mensajes para no saturar el contexto
+      const finalHistory = updatedHistory.slice(-6);
+
+      await supabase.from('bot_sessions').upsert({
+        telegram_id: telegramId,
+        history: finalHistory,
+        last_message_at: now.toISOString()
+      }, { onConflict: 'telegram_id' });
+    }
+
   } catch (err: any) {
-    console.error('Error procesando registro:', err);
+    console.error('Error en el bot:', err);
     let msg = `❌ Error: ${err.message || 'Error desconocido'}`;
     if (err.status === 429) {
-      msg = `⚠️ **Límite alcanzado:** Has llegado al límite de la versión gratuita de Gemini. Espera un momento.`;
+      msg = `⚠️ **Límite alcanzado:** Espera un momento.`;
     }
     await ctx.reply(msg, { parse_mode: 'Markdown' });
   }
@@ -94,7 +153,7 @@ bot.start((ctx) => ctx.reply('¡Hola! Soy Herbie, tu asistente clínico. Puedes 
 // Lógica para mensajes de texto
 bot.on('text', async (ctx) => {
   if (ctx.message.text.startsWith('/')) return;
-  await processAndSave([ctx.message.text], ctx, ctx.message.text);
+  await processAndSave([ctx.message.text], ctx);
 });
 
 // Lógica para mensajes de voz
