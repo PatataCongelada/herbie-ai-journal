@@ -48,23 +48,22 @@ async function ingest() {
     const relativePath = path.relative(MANUALS_DIR, filePath);
     const pathParts = relativePath.split(path.sep);
     
-    // Suponemos estructura: expert/category/archivo.pdf
-    // O simplemente categoria/expert/archivo.pdf
-    // Vamos a ser flexibles: si hay subcarpetas, las mapeamos.
+    // Simplificación: la carpeta de primer nivel es la categoría directamente
     let expert = 'general';
     let category = 'general';
 
-    if (pathParts.length >= 3) {
-      expert = pathParts[0].toLowerCase();
-      category = pathParts[1].toLowerCase();
-    } else if (pathParts.length === 2) {
-      // Si solo hay un nivel, asumimos que es el experto o la categoría
-      // Por simplicidad, si es 'teoria' o 'practica', es categoría.
-      const first = pathParts[0].toLowerCase();
-      if (['teoria', 'practica'].includes(first)) {
-        category = first;
-      } else {
-        expert = first;
+    const first = pathParts[0].toLowerCase();
+    if (['teoria', 'practica', 'teorico_practico'].includes(first)) {
+      category = first;
+      // Si hay un segundo nivel, lo tomamos como experto
+      if (pathParts.length >= 3) {
+        expert = pathParts[1].toLowerCase();
+      }
+    } else {
+      // Si el primer nivel no es una categoría, lo tomamos como experto
+      expert = first;
+      if (pathParts.length >= 3) {
+        category = pathParts[1].toLowerCase();
       }
     }
 
@@ -91,37 +90,49 @@ async function ingest() {
       const chunk = chunks[i];
       if (chunk.length < 20) continue;
 
-      try {
-        // Delay para evitar 429
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // @ts-ignore
-        const result = await embeddingModel.embedContent({
-          content: { role: 'user', parts: [{ text: chunk }] },
-          outputDimensionality: 768
-        });
-        const embedding = result.embedding.values;
+      let retryCount = 0;
+      const maxRetries = 5;
+      let success = false;
 
-        const { error } = await supabase
-          .from('manual_knowledge')
-          .insert({
-            content: chunk,
-            embedding: embedding,
-            category: category,
-            expert: expert,
-            metadata: {
-              source: fileName,
-              full_path: relativePath,
-              chunk_index: i,
-              total_chunks: chunks.length
-            }
+      while (retryCount < maxRetries && !success) {
+        try {
+          // @ts-ignore
+          const result = await embeddingModel.embedContent({
+            content: { role: 'user', parts: [{ text: chunk }] },
+            outputDimensionality: 768
           });
+          const embedding = result.embedding.values;
 
-        if (error) throw error;
-        
-        if (i % 50 === 0) process.stdout.write('.');
-      } catch (err) {
-        console.error(`\n❌ Error en fragmento ${i}:`, err);
+          const { error } = await supabase
+            .from('manual_knowledge')
+            .insert({
+              content: chunk,
+              embedding: embedding,
+              category: category,
+              expert: expert,
+              metadata: {
+                source: fileName,
+                full_path: relativePath,
+                chunk_index: i,
+                total_chunks: chunks.length
+              }
+            });
+
+          if (error) throw error;
+          
+          if (i % 50 === 0) process.stdout.write('.');
+          success = true;
+        } catch (err: any) {
+          if (err.status === 429) {
+            retryCount++;
+            const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
+            console.log(`\n⚠️ Cuota excedida (429). Reintentando en ${Math.round(delay/1000)}s... (Intento ${retryCount}/${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          } else {
+            console.error(`\n❌ Error en fragmento ${i}:`, err);
+            break; // No reintentar en otros errores
+          }
+        }
       }
     }
     console.log(`\n✅ ${fileName} completado.`);

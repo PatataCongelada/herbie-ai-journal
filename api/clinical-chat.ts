@@ -52,16 +52,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 1. Obtener contexto clínico filtrado
     const context = await getClinicalContext(lastMessage, category, expert);
 
-    // 2. Personalizar el sistema según el experto
-    let expertInstructions = "";
-    if (expert === 'tomas') {
-      expertInstructions = "Tu personalidad es la de Tomás Carrasco. Eres pragmático, te enfocas en el análisis funcional riguroso y en la modificación de conducta directa.";
-    } else if (expert === 'froxan') {
-      expertInstructions = "Tu personalidad es la de María Xesús Froxán. Te enfocas en la psicología conductista radical, el análisis verbal y la precisión terminológica clínica.";
+    // 2. Ajustar el tono según el modo
+    let modeInstructions = "";
+    if (category === 'teoria') {
+      modeInstructions = "Tu enfoque es TEÓRICO. Actúa como un tutor académico, explica conceptos, cita principios de ABA y sé muy riguroso técnicamente.";
+    } else if (category === 'practica') {
+      modeInstructions = "Tu enfoque es PRÁCTICO. Actúa como un supervisor clínico, analizando conductas, sugiriendo intervenciones y centrándote en la aplicación real.";
+    } else if (category === 'teorico_practico') {
+      modeInstructions = "Tu enfoque es MIXTO (Teórico-Práctico). Combina la base teórica con ejemplos de aplicación clínica.";
     }
 
     const systemPrompt = `Eres Herbie, un experto en Análisis de Conducta Aplicado (ABA) y psicología clínica. 
-${expertInstructions}
+${modeInstructions}
 
 Usa el siguiente contexto extraído de manuales clínicos para responder. 
 Si el contexto no contiene la respuesta, admítelo pero intenta razonar basándote en principios generales de ABA.

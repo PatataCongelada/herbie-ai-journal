@@ -24,8 +24,7 @@ const ABAPage = () => {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [selectedExpert, setSelectedExpert] = useState<'all' | 'tomas' | 'froxan'>('all');
-  const [selectedMode, setSelectedMode] = useState<'all' | 'teoria' | 'practica'>('all');
+  const [selectedMode, setSelectedMode] = useState<'all' | 'teoria' | 'practica' | 'teorico_practico'>('all');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,7 +52,7 @@ const ABAPage = () => {
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
           category: selectedMode,
-          expert: selectedExpert
+          expert: 'all'
         })
       });
 
@@ -103,39 +102,15 @@ const ABAPage = () => {
       </div>
 
       {/* Control Center */}
-      <div className="bg-card border-b p-3 flex flex-wrap gap-4 items-center justify-center sm:justify-start overflow-x-auto no-scrollbar">
+      <div className="bg-card border-b p-3 flex items-center justify-center sm:justify-start overflow-x-auto no-scrollbar">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase">Experto:</span>
-          <div className="flex bg-muted rounded-lg p-0.5">
-            {[
-              { id: 'all', label: 'Todos' },
-              { id: 'tomas', label: 'Tomás' },
-              { id: 'froxan', label: 'Froxán' }
-            ].map((e) => (
-              <button
-                key={e.id}
-                onClick={() => setSelectedExpert(e.id as any)}
-                className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${
-                  selectedExpert === e.id 
-                    ? "bg-background shadow-sm text-primary" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {e.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="h-4 w-px bg-border hidden sm:block" />
-
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase">Foco:</span>
+          <span className="text-[10px] font-bold text-muted-foreground uppercase">Modo:</span>
           <div className="flex bg-muted rounded-lg p-0.5">
             {[
               { id: 'all', label: 'Todo' },
               { id: 'teoria', label: 'Teoría' },
-              { id: 'practica', label: 'Práctica' }
+              { id: 'practica', label: 'Práctica' },
+              { id: 'teorico_practico', label: 'Teo-Prac' }
             ].map((m) => (
               <button
                 key={m.id}
@@ -177,7 +152,7 @@ const ABAPage = () => {
                 {msg.isExpert && (
                   <div className="mt-3 pt-2 border-t border-border/50 text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-1.5">
                     <BookOpen className="w-3 h-3" /> 
-                    Contenido extraído de: {selectedExpert === 'all' ? 'Manuales Clínicos' : selectedExpert === 'tomas' ? 'Tomás Carrasco' : 'Froxán et al.'}
+                    Conocimiento extraído del Cerebro Clínico
                   </div>
                 )}
               </div>
