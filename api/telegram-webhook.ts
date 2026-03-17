@@ -47,9 +47,9 @@ async function processAndSave(text: string, ctx: any) {
     if (error) throw error;
 
     await ctx.reply(`✅ Registro clínico guardado con éxito:\n\n"${text}"`);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error procesando registro:', err);
-    await ctx.reply('❌ Lo siento, hubo un fallo al procesar tu mensaje.');
+    await ctx.reply(`❌ Lo siento, hubo un fallo al procesar tu mensaje: ${err.message || 'Error desconocido'}`);
   }
 }
 
