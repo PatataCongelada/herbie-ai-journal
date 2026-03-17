@@ -20,11 +20,7 @@ const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embeddin
 
 async function getClinicalContext(query: string, category: string, expert: string): Promise<string> {
   try {
-    // @ts-ignore
-    const result = await embeddingModel.embedContent({
-      content: { role: 'user', parts: [{ text: query }] },
-      outputDimensionality: 768
-    });
+    const result = await embeddingModel.embedContent(query);
     const embedding = result.embedding.values;
 
     const { data: matches, error } = await supabase.rpc('match_manual_knowledge', {
@@ -81,11 +77,31 @@ ${context}`;
       systemInstruction: systemPrompt 
     });
 
+    const rawMessages = messages.slice(0, -1);
+    const chatHistory: { role: string, parts: any[] }[] = [];
+    
+    // Filtramos para asegurar que empiece siempre por 'user' y alterne
+    let expectedRole = 'user';
+    for (let i = 0; i < rawMessages.length; i++) {
+      const msgRole = rawMessages[i].role === 'assistant' ? 'model' : 'user';
+      
+      if (msgRole === expectedRole) {
+        chatHistory.push({
+          role: expectedRole,
+          parts: [{ text: rawMessages[i].content }],
+        });
+        expectedRole = expectedRole === 'user' ? 'model' : 'user';
+      }
+      // Si recibimos un 'model' cuando esperábamos 'user' (ej. el saludo inicial), lo ignoramos.
+      // Si recibimos dos 'user' seguidos, ignoramos el segundo (o los agrupamos, pero ignorar es más seguro para la API).
+    }
+
+    console.log('--- DEBUG CHAT ---');
+    console.log('Final History Roles:', chatHistory.map(h => h.role));
+    console.log('Last Message:', lastMessage);
+
     const chat = chatModel.startChat({
-      history: messages.slice(0, -1).map((m: any) => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      })),
+      history: chatHistory,
     });
 
     const result = await chat.sendMessage(lastMessage);

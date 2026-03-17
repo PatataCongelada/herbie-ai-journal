@@ -53,8 +53,8 @@ async function ingest() {
     let category = 'general';
 
     const first = pathParts[0].toLowerCase();
-    if (['teoria', 'practica', 'teorico_practico'].includes(first)) {
-      category = first;
+    if (['teoria', 'practica', 'practico', 'teorico_practico'].includes(first)) {
+      category = (first === 'practico') ? 'practica' : first;
       // Si hay un segundo nivel, lo tomamos como experto
       if (pathParts.length >= 3) {
         expert = pathParts[1].toLowerCase();
@@ -68,8 +68,13 @@ async function ingest() {
     }
 
     const fileName = path.basename(filePath);
-    console.log(`\n📄 Procesando: ${fileName} [Expert: ${expert}, Category: ${category}]...`);
     
+    // Check how many chunks are already processed
+    const { count: existingCount } = await supabase
+      .from('manual_knowledge')
+      .select('id', { count: 'exact', head: true })
+      .filter('metadata->>full_path', 'eq', relativePath);
+
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdf(dataBuffer);
     const fullText = data.text;
@@ -83,10 +88,16 @@ async function ingest() {
       chunks.push(fullText.substring(i, i + chunkSize).trim());
     }
 
-    console.log(`🧩 Generados ${chunks.length} fragmentos. Subiendo a Supabase...`);
+    if (existingCount !== null && existingCount >= chunks.length) {
+      console.log(`⏩ Saltando: ${fileName} (Completado: ${existingCount}/${chunks.length} fragmentos).`);
+      continue;
+    }
+
+    console.log(`\n📄 Procesando: ${fileName} [Expert: ${expert}, Category: ${category}]...`);
+    console.log(`🧩 Fragmentos: ${chunks.length} (En DB: ${existingCount || 0}). Subiendo restantes...`);
 
     // 2. Generar Embeddings y Subir
-    for (let i = 0; i < chunks.length; i++) {
+    for (let i = (existingCount || 0); i < chunks.length; i++) {
       const chunk = chunks[i];
       if (chunk.length < 20) continue;
 
