@@ -59,8 +59,28 @@ const ABAPage = () => {
   const [isGlobalStop, setIsGlobalStop] = useState(false);
   const [selectedMode, setSelectedMode] = useState<'all' | 'teoria' | 'practica' | 'teorico_practico'>('all');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [rateLimitUntil, setRateLimitUntil] = useState<Date | null>(null);
+  const [rateLimitCountdown, setRateLimitCountdown] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rateLimitTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Rate limit countdown
+  useEffect(() => {
+    if (rateLimitUntil) {
+      const update = () => {
+        const secondsLeft = Math.max(0, Math.ceil((rateLimitUntil.getTime() - Date.now()) / 1000));
+        setRateLimitCountdown(secondsLeft);
+        if (secondsLeft <= 0) {
+          setRateLimitUntil(null);
+          if (rateLimitTimerRef.current) clearInterval(rateLimitTimerRef.current);
+        }
+      };
+      update();
+      rateLimitTimerRef.current = setInterval(update, 1000);
+    }
+    return () => { if (rateLimitTimerRef.current) clearInterval(rateLimitTimerRef.current); };
+  }, [rateLimitUntil]);
 
   // Start/stop elapsed timer
   useEffect(() => {
@@ -108,6 +128,10 @@ const ABAPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        // Manejo específico de rate limit 429
+        if (response.status === 429 && errorData.retryAt) {
+          setRateLimitUntil(new Date(errorData.retryAt));
+        }
         throw new Error(errorData.text || "⚠️ No he podido conectar con mi base de conocimientos. ¿Podrías reintentarlo?");
       }
       
@@ -288,9 +312,28 @@ const ABAPage = () => {
 
         {/* Input Area */}
         <div className="p-4 pb-24 lg:pb-6">
+
+          {/* Rate limit banner */}
+          <AnimatePresence>
+            {rateLimitUntil && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="mb-3 px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs flex items-center gap-2 max-w-lg mx-auto"
+              >
+                <span className="text-base">⚠️</span>
+                <div>
+                  <p className="font-bold">Límite de consultas alcanzado</p>
+                  <p>Podrás escribir de nuevo en <span className="font-mono font-bold">{rateLimitCountdown}s</span> — a las <span className="font-mono">{rateLimitUntil.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span></p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="relative group max-w-lg mx-auto">
             {(() => {
-              const isBlocked = isTyping || messages.some(m => m.isStreaming);
+              const isBlocked = isTyping || messages.some(m => m.isStreaming) || !!rateLimitUntil;
               return (
                 <>
                   <textarea
@@ -303,9 +346,12 @@ const ABAPage = () => {
                       }
                     }}
                     disabled={isBlocked}
-                    placeholder={isBlocked
-                      ? `Herbie lleva ${elapsedSeconds}s respondiendo... detén primero a Herbie para escribir.`
-                      : "Describe un caso para analizar..."
+                    placeholder={
+                      rateLimitUntil
+                        ? `⚠️ Límite alcanzado. Disponible en ${rateLimitCountdown}s (${rateLimitUntil.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })})`
+                        : isBlocked
+                        ? `Herbie lleva ${elapsedSeconds}s respondiendo... detén primero a Herbie para escribir.`
+                        : "Describe un caso para analizar..."
                     }
                     className={`w-full rounded-2xl px-5 py-4 text-sm focus:outline-none transition-all resize-none pr-14 border ${
                       isBlocked

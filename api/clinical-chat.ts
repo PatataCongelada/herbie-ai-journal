@@ -118,10 +118,30 @@ ${context}`;
     console.error('Error en clinical-chat:', error);
     
     // Manejo específico de cuotas/límites
-    if (error.status === 429 || error.message?.includes('429')) {
+    if (error.status === 429 || (error.message?.includes('429')) || error.message?.toLowerCase().includes('quota') || error.message?.toLowerCase().includes('rate')) {
+      // Intentar extraer el tiempo de espera del mensaje de error
+      let retryAfterSeconds = 60; // Default: 60 segundos
+      
+      // Gemini suele incluir algo como "retry_delay { seconds: 60 }" o "Retry-After: 60"
+      const retryMatch = error.message?.match(/retry[_\-]?delay[^\d]*(\d+)/i) ||
+                         error.message?.match(/seconds[:\s]*(\d+)/i) ||
+                         error.message?.match(/wait[^\d]*(\d+)/i) ||
+                         error.errorDetails?.find((d: any) => d['@type']?.includes('RetryInfo'))?.retryDelay?.seconds;
+
+      if (typeof retryMatch === 'number') {
+        retryAfterSeconds = retryMatch;
+      } else if (retryMatch?.[1]) {
+        retryAfterSeconds = parseInt(retryMatch[1], 10);
+      }
+
+      const retryAt = new Date(Date.now() + retryAfterSeconds * 1000).toISOString();
+      console.warn(`⚠️ Rate limit alcanzado. Retry en ${retryAfterSeconds}s (${retryAt})`);
+
       return res.status(429).json({ 
-        text: "Espera un momento, he alcanzado un límite de consultas. Por favor, dame unos segundos para descansar y vuelve a intentarlo.",
-        error: 'RATE_LIMIT_REACHED'
+        text: `⏳ Has alcanzado el límite de consultas de la IA. Podrás volver a escribir en aproximadamente **${retryAfterSeconds} segundos**.`,
+        error: 'RATE_LIMIT_REACHED',
+        retryAfterSeconds,
+        retryAt
       });
     }
 
