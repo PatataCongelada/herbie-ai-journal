@@ -1,9 +1,31 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Brain, Sparkles, Zap, Moon, BrainCircuit } from "lucide-react";
+import { useState, useEffect } from "react";
+
+const ABA_QUOTES = [
+  "La conducta es función del ambiente. Skinner, 1938.",
+  "No hay conductas malas, solo contingencias mal diseñadas.",
+  "El reforzamiento positivo aumenta la probabilidad de la conducta futura.",
+  "Una conducta que no tiene consecuencias tiende a extinguirse.",
+  "El antecedente establece la ocasión; la consecuencia la mantiene.",
+  "El castigo suprime la conducta, pero no enseña la conducta alternativa.",
+  "Mide la conducta: frecuencia, duración, intensidad, latencia.",
+  "ABC: Antecedente → Conducta → Consecuencia. La triada del análisis funcional.",
+  "En ABA, el contexto no es ruido: es parte de la ecuación.",
+  "La generalización es el objetivo real de toda intervención conductual.",
+];
 
 const PlanSelection = () => {
   const navigate = useNavigate();
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex(prev => (prev + 1) % ABA_QUOTES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const plans = [
     {
@@ -122,9 +144,16 @@ const PlanSelection = () => {
         <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
           Dato HERBIE
         </p>
-        <p className="text-sm italic text-muted-foreground mt-2">
-          "Pequeños pasos constantes llevan a grandes cambios estructurales."
-        </p>
+        <motion.p
+          key={quoteIndex}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.4 }}
+          className="text-sm italic text-muted-foreground mt-2"
+        >
+          "{ABA_QUOTES[quoteIndex]}"
+        </motion.p>
       </motion.div>
     </div>
   );
