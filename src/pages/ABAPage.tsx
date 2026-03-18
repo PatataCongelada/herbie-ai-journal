@@ -12,23 +12,35 @@ interface Message {
   isStreaming?: boolean;
 }
 
-const TypewriterText = ({ text, onComplete }: { text: string; onComplete?: () => void }) => {
+const TypewriterText = ({ text, onComplete, isStopped }: { text: string; onComplete?: () => void, isStopped?: boolean }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    if (isStopped) {
+      setDisplayedText(text); // Mostrar todo si se detiene
+      if (onComplete) onComplete();
+      return;
+    }
+
     if (currentIndex < text.length) {
+      const char = text[currentIndex];
+      // Si detectamos un salto de línea doble, hacemos una pausa más larga
+      const isParagraphEnd = text.slice(currentIndex, currentIndex + 2) === "\n\n";
+      const delay = isParagraphEnd ? 300 : 15;
+
       const timeout = setTimeout(() => {
-        setDisplayedText(prev => prev + text[currentIndex]);
+        setDisplayedText(prev => prev + char);
         setCurrentIndex(prev => prev + 1);
-      }, 15); // Velocidad de escritura
+      }, delay);
+      
       return () => clearTimeout(timeout);
     } else if (onComplete) {
       onComplete();
     }
-  }, [currentIndex, text, onComplete]);
+  }, [currentIndex, text, onComplete, isStopped]);
 
-  return <>{displayedText}</>;
+  return <div className="whitespace-pre-wrap">{displayedText}</div>;
 };
 
 const ABAPage = () => {
@@ -44,6 +56,7 @@ const ABAPage = () => {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isGlobalStop, setIsGlobalStop] = useState(false);
   const [selectedMode, setSelectedMode] = useState<'all' | 'teoria' | 'practica' | 'teorico_practico'>('all');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -64,6 +77,7 @@ const ABAPage = () => {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
+    setIsGlobalStop(false);
 
     try {
       const response = await fetch('/api/clinical-chat', {
@@ -172,14 +186,18 @@ const ABAPage = () => {
                 {msg.isStreaming ? (
                   <TypewriterText 
                     text={msg.content} 
+                    isStopped={isGlobalStop}
                     onComplete={() => {
                       setMessages(prev => prev.map(m => 
                         m.id === msg.id ? { ...m, isStreaming: false } : m
                       ));
+                      if (msg.id === messages[messages.length - 1].id) {
+                        setIsGlobalStop(false);
+                      }
                     }} 
                   />
                 ) : (
-                  msg.content
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
                 )}
                 {msg.isExpert && (
                   <div className="mt-3 pt-2 border-t border-border/50 text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-1.5">
@@ -225,6 +243,22 @@ const ABAPage = () => {
       {/* Input Area */}
       <div className="p-4 bg-background border-t pb-24 lg:pb-8">
         <div className="relative group max-w-lg mx-auto">
+          {/* Stop Button */}
+          <AnimatePresence>
+            {(isTyping || messages.some(m => m.isStreaming)) && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                onClick={() => setIsGlobalStop(true)}
+                className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-full text-xs font-bold shadow-lg hover:scale-105 transition-all"
+              >
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                Detener Herbie
+              </motion.button>
+            )}
+          </AnimatePresence>
+
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
