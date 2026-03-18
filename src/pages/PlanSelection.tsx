@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Brain, Sparkles, Zap, Moon, BrainCircuit } from "lucide-react";
+import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const ABA_QUOTES = [
@@ -52,7 +52,25 @@ const PlanSelection = () => {
       color: "from-emerald-400 to-teal-500",
       lightColor: "bg-teal-500/10 text-teal-600",
     },
+    {
+      id: "aprendizaje",
+      title: "Aprendizaje Sin Errores",
+      description: "Aprende conceptos complejos de forma secuencial y sin frustración.",
+      path: "/learning",
+      icon: GraduationCap,
+      color: "from-violet-400 to-purple-500",
+      lightColor: "bg-violet-500/10 text-violet-600",
+      isBeta: true
+    },
   ];
+
+  const handleNavigate = (plan: any) => {
+    if (plan.path) {
+      navigate(plan.path);
+    } else {
+      navigate(`/dashboard/${plan.id}`);
+    }
+  };
 
   return (
     <div className="flex flex-col h-dvh bg-background overflow-hidden">
@@ -85,7 +103,7 @@ const PlanSelection = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
-                onClick={() => navigate(`/dashboard/${plan.id}`)}
+                onClick={() => handleNavigate(plan)}
                 className="w-full relative group"
               >
                 <div className="herbie-card p-5 flex items-center gap-5 text-left border-transparent group-hover:border-primary/20 transition-all duration-300 active:scale-[0.98]">
@@ -93,9 +111,14 @@ const PlanSelection = () => {
                     <Icon className="w-7 h-7" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-card-foreground">
-                      {plan.title}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold text-card-foreground">
+                        {plan.title}
+                      </h3>
+                      {plan.isBeta && (
+                        <span className="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Beta</span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       {plan.description}
                     </p>
