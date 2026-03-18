@@ -27,16 +27,20 @@ const ABAPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/decompose-concept", {
+      const response = await fetch("/api/clinical-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ concept: input }),
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage],
+          category: "all",
+          expert: "all"
+        }),
       });
 
       if (!response.ok) throw new Error("Error en la respuesta");
 
       const data = await response.json();
-      setMessages((prev) => [...prev, { role: "assistant", content: data.explanation }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: data.text }]);
     } catch (error) {
       console.error("Error:", error);
       setMessages((prev) => [...prev, { role: "assistant", content: t('aba.error_response') || "Lo siento, hubo un error." }]);
