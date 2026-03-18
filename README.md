@@ -1,73 +1,41 @@
-# Welcome to your Lovable project
+# Herbie — Tu Diario Clínico Inteligente 🤖🧠
 
-## Project info
+Herbie es un asistente clínico impulsado por inteligencia artificial, especializado en Análisis de Conducta Aplicado (ABA). Permite registrar datos clínicos, analizar conductas y consultar manuales especializados en tiempo real.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Características principales
 
-## How can I edit this code?
+- **Cerebro Experto ABA**: Chat con IA entrenado con manuales clínicos (RAG)
+- **Registro Automático**: Extracción de campos clínicos con IA
+- **Dashboard Clínico**: Visualización de registros por plan
+- **Bot de Telegram**: Registro conversacional desde el móvil
 
-There are several ways of editing your application.
+## Stack técnico
 
-**Use Lovable**
+- **Frontend**: React + Vite + TypeScript + Framer Motion
+- **Backend**: Node.js (api-bridge) + Vercel Serverless Functions  
+- **IA**: Google Gemini API (chat + embeddings)
+- **Base de datos**: Supabase (PostgreSQL + pgvector)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Desarrollo local
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+También necesitas el puente API:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npx tsx api-bridge.ts
+```
 
-**Use GitHub Codespaces**
+## Variables de entorno necesarias
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+GOOGLE_GEMINI_API_KEY=
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+TELEGRAM_BOT_TOKEN=
+```
