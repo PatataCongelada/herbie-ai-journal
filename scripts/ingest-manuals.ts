@@ -109,8 +109,7 @@ async function ingest() {
         try {
           // @ts-ignore
           const result = await embeddingModel.embedContent({
-            content: { role: 'user', parts: [{ text: chunk }] },
-            outputDimensionality: 768
+            content: { role: 'user', parts: [{ text: chunk }] }
           });
           const embedding = result.embedding.values;
 
@@ -133,6 +132,9 @@ async function ingest() {
           
           if (i % 50 === 0) process.stdout.write('.');
           success = true;
+
+          // Pequeño retardo obligatorio para no saturar la cuota si el chat está activo
+          await new Promise(resolve => setTimeout(resolve, 500));
         } catch (err: any) {
           if (err.status === 429) {
             retryCount++;
