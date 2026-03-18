@@ -13,7 +13,7 @@ if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-2.5-flash-lite",
+  model: "gemini-2.0-flash",
   systemInstruction: "" // Se actualizará en cada request
 });
 const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
@@ -80,7 +80,7 @@ ${context}`;
 
     // 3. Configurar el modelo con las instrucciones específicas
     const chatModel = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash-lite",
+      model: "gemini-2.0-flash",
       systemInstruction: systemPrompt 
     });
 

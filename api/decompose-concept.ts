@@ -50,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 2. Configurar el modelo para generar el programa de aprendizaje
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash-lite",
+      model: "gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json"
       }

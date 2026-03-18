@@ -37,13 +37,16 @@ const ABAPage = () => {
         }),
       });
 
-      if (!response.ok) throw new Error("Error en la respuesta");
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.text || "Error en la respuesta");
+      }
+
       setMessages((prev) => [...prev, { role: "assistant", content: data.text }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      setMessages((prev) => [...prev, { role: "assistant", content: t('aba.error_response') || "Lo siento, hubo un error." }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: error.message || t('aba.error_response') || "Lo siento, hubo un error." }]);
     } finally {
       setIsLoading(false);
     }
