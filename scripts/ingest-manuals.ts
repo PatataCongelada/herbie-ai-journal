@@ -19,6 +19,10 @@ if (!supabaseUrl || !supabaseKey || !geminiKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 const genAI = new GoogleGenerativeAI(geminiKey);
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-2.0-flash",
+  systemInstruction: "" // Se actualizará en cada request
+});
 const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
 
 const MANUALS_DIR = './docs/manuals';
@@ -137,13 +141,20 @@ async function ingest() {
             else if (i % 2 === 0) process.stdout.write('.');
             
             success = true;
+            // Esperar 4 segundos entre fragmentos exitosos para respetar el límite RPM (15)
+            await new Promise(resolve => setTimeout(resolve, 4000));
           } catch (err: any) {
             retryCount++;
-            const isTimeout = err.message === 'TIMEOUT_API';
-            const is429 = err.status === 429;
-            const delay = Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
+            const errorMessage = err.message?.toLowerCase() || "";
+            const isTimeout = errorMessage.includes('timeout');
+            const is429 = errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate');
             
-            process.stdout.write(`\n⚠️ Error en chunk ${i} (${isTimeout ? 'Timeout' : is429 ? '429' : err.message}). Reintento ${retryCount}/${maxRetries} en ${Math.round(delay/1000)}s...`);
+            // Backoff exponencial más agresivo para 429
+            const delay = is429 
+              ? Math.pow(2, retryCount + 2) * 1000 + Math.random() * 2000
+              : Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
+            
+            process.stdout.write(`\n⚠️ Error en chunk ${i} (${isTimeout ? 'Timeout' : is429 ? '429/Quota' : err.message}). Reintento ${retryCount}/${maxRetries} en ${Math.round(delay/1000)}s...`);
             await new Promise(resolve => setTimeout(resolve, delay));
             
             if (retryCount >= maxRetries) {
