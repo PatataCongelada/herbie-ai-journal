@@ -4,16 +4,16 @@ import { Brain, Sparkles, Zap, Moon, BrainCircuit } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const ABA_QUOTES = [
-  "La conducta es función del ambiente. Skinner, 1938.",
-  "No hay conductas malas, solo contingencias mal diseñadas.",
-  "El reforzamiento positivo aumenta la probabilidad de la conducta futura.",
-  "Una conducta que no tiene consecuencias tiende a extinguirse.",
-  "El antecedente establece la ocasión; la consecuencia la mantiene.",
-  "El castigo suprime la conducta, pero no enseña la conducta alternativa.",
-  "Mide la conducta: frecuencia, duración, intensidad, latencia.",
-  "ABC: Antecedente → Conducta → Consecuencia. La triada del análisis funcional.",
-  "En ABA, el contexto no es ruido: es parte de la ecuación.",
-  "La generalización es el objetivo real de toda intervención conductual.",
+  "Toda conducta es un mensaje sin palabras, esperando ser leído con paciencia.",
+  "El ambiente no te define, pero te da las cartas con las que juegas.",
+  "Reforzar no es premiar: es encender una llama donde antes había oscuridad.",
+  "Antes del cambio siempre hay un antecedente. Aprende a leerlo.",
+  "Una consecuencia justa enseña lo que mil palabras no pueden.",
+  "La extinción duele antes de liberar. Es el último grito de lo aprendido.",
+  "Mide lo que te importa. Lo que no se mide, se olvida en silencio.",
+  "El contexto no es el fondo del cuadro, es el pincel que lo pinta.",
+  "Generalizar no es copiar: es aprender que el mundo también puede ser seguro.",
+  "El cambio más profundo ocurre sin que nadie lo note, fragmento a fragmento.",
 ];
 
 const PlanSelection = () => {
