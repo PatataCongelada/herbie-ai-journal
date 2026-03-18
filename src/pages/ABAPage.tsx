@@ -266,27 +266,35 @@ const ABAPage = () => {
       {/* Input Area */}
       <div className="p-4 bg-background border-t pb-24 lg:pb-8">
         <div className="relative group max-w-lg mx-auto">
+          {(() => { const isBlocked = isTyping || messages.some(m => m.isStreaming); return (
+          <>
 
           <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => !isBlocked && setInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey && !isBlocked) {
                 e.preventDefault();
                 sendMessage();
               }
             }}
-            placeholder="Describe un caso para analizar..."
-            className="w-full bg-muted/50 hover:bg-muted rounded-2xl px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none pr-14 border border-border/50"
+            disabled={isBlocked}
+            placeholder={isBlocked ? "Herbie está escribiendo... Para enviar un mensaje, detén primero a Herbie." : "Describe un caso para analizar..."}
+            className={`w-full rounded-2xl px-5 py-4 text-sm focus:outline-none transition-all resize-none pr-14 border ${
+              isBlocked
+                ? "bg-muted/30 border-border/30 text-muted-foreground cursor-not-allowed opacity-60"
+                : "bg-muted/50 hover:bg-muted border-border/50 focus:ring-2 focus:ring-primary/20"
+            }`}
             rows={2}
           />
           <button
             onClick={sendMessage}
-            disabled={!input.trim() || isTyping}
+            disabled={!input.trim() || isBlocked}
             className="absolute right-3 bottom-3 p-2.5 bg-primary text-primary-foreground rounded-xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
           >
             <Send className="w-4 h-4" />
           </button>
+          </> ); })()}
         </div>
       </div>
     </div>
