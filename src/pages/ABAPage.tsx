@@ -58,7 +58,23 @@ const ABAPage = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [isGlobalStop, setIsGlobalStop] = useState(false);
   const [selectedMode, setSelectedMode] = useState<'all' | 'teoria' | 'practica' | 'teorico_practico'>('all');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Start/stop elapsed timer
+  useEffect(() => {
+    if (isTyping) {
+      setElapsedSeconds(0);
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds(s => s + 1);
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setElapsedSeconds(0);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [isTyping]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -230,8 +246,13 @@ const ABAPage = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex justify-center pt-2"
+                className="flex justify-center items-center gap-3 pt-2"
               >
+                {isTyping && (
+                  <span className="text-[11px] text-muted-foreground font-mono tabular-nums">
+                    ⏱ {elapsedSeconds}s
+                  </span>
+                )}
                 <button
                   onClick={() => setIsGlobalStop(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive border border-destructive/20 rounded-full text-xs font-bold hover:bg-destructive/20 transition-all shadow-sm"
@@ -282,7 +303,10 @@ const ABAPage = () => {
                       }
                     }}
                     disabled={isBlocked}
-                    placeholder={isBlocked ? "Herbie está escribiendo... detén primero a Herbie para responder." : "Describe un caso para analizar..."}
+                    placeholder={isBlocked
+                      ? `Herbie lleva ${elapsedSeconds}s respondiendo... detén primero a Herbie para escribir.`
+                      : "Describe un caso para analizar..."
+                    }
                     className={`w-full rounded-2xl px-5 py-4 text-sm focus:outline-none transition-all resize-none pr-14 border ${
                       isBlocked
                         ? "bg-muted/30 border-border/30 text-muted-foreground cursor-not-allowed opacity-60"
