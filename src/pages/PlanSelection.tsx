@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Brain, Sparkles, Zap, Moon, BrainCircuit } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -55,105 +55,112 @@ const PlanSelection = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background px-4 pt-12 pb-20 space-y-8">
-      {/* Header Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-3"
-      >
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl herbie-gradient shadow-lg shadow-primary/20 mb-2">
-          <Sparkles className="w-8 h-8 text-white" />
-        </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-          Hola de nuevo
-        </h1>
-        <p className="text-muted-foreground text-balanced max-w-[280px] mx-auto">
-          ¿En qué plan clínico vamos a trabajar hoy?
-        </p>
-      </motion.div>
-
-      {/* Plans List */}
-      <div className="space-y-4 max-w-md mx-auto">
-        {plans.map((plan, i) => {
-          const Icon = plan.icon;
-          return (
-            <motion.button
-              key={plan.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-              onClick={() => navigate(`/dashboard/${plan.id}`)}
-              className="w-full relative group"
-            >
-              <div className="herbie-card p-5 flex items-center gap-5 text-left border-transparent group-hover:border-primary/20 transition-all duration-300 active:scale-[0.98]">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${plan.lightColor}`}>
-                  <Icon className="w-7 h-7" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-card-foreground">
-                    {plan.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {plan.description}
-                  </p>
-                </div>
-              </div>
-              {/* Subtle gradient effect on card */}
-              <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${plan.color} opacity-0 group-hover:opacity-[0.03] transition-opacity pointer-events-none`} />
-            </motion.button>
-          );
-        })}
-      </div>
-
-      {/* Featured: ABA Expert */}
-      <div className="max-w-md mx-auto pt-4">
-        <motion.button
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-          onClick={() => navigate("/aba")}
-          className="w-full relative group overflow-hidden rounded-3xl p-px bg-gradient-to-br from-primary/50 via-primary/20 to-transparent"
+    <div className="flex flex-col h-dvh bg-background overflow-hidden">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto px-4 pt-12 pb-8 space-y-8 no-scrollbar">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center space-y-3"
         >
-          <div className="relative bg-card rounded-[23px] p-5 flex items-center gap-5 text-left transition-all duration-300 group-hover:bg-muted/50">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-primary/10 text-primary shadow-lg shadow-primary/5">
-              <BrainCircuit className="w-8 h-8" />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-black text-card-foreground">
-                  Cerebro Experto ABA
-                </h3>
-                <span className="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Beta</span>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Análisis funcional de conducta avanzado. Descubre por qué haces lo que haces.
-              </p>
-            </div>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl herbie-gradient shadow-lg shadow-primary/20 mb-2">
+            <Sparkles className="w-8 h-8 text-white" />
           </div>
-        </motion.button>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+            Hola de nuevo
+          </h1>
+          <p className="text-muted-foreground text-balanced max-w-[280px] mx-auto">
+            ¿En qué plan clínico vamos a trabajar hoy?
+          </p>
+        </motion.div>
+
+        {/* Plans List */}
+        <div className="space-y-4 max-w-md mx-auto">
+          {plans.map((plan, i) => {
+            const Icon = plan.icon;
+            return (
+              <motion.button
+                key={plan.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                onClick={() => navigate(`/dashboard/${plan.id}`)}
+                className="w-full relative group"
+              >
+                <div className="herbie-card p-5 flex items-center gap-5 text-left border-transparent group-hover:border-primary/20 transition-all duration-300 active:scale-[0.98]">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${plan.lightColor}`}>
+                    <Icon className="w-7 h-7" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold text-card-foreground">
+                      {plan.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {plan.description}
+                    </p>
+                  </div>
+                </div>
+                {/* Subtle gradient effect on card */}
+                <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${plan.color} opacity-0 group-hover:opacity-[0.03] transition-opacity pointer-events-none`} />
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* Featured: ABA Expert */}
+        <div className="max-w-md mx-auto pt-4">
+          <motion.button
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 }}
+            onClick={() => navigate("/aba")}
+            className="w-full relative group overflow-hidden rounded-3xl p-px bg-gradient-to-br from-primary/50 via-primary/20 to-transparent"
+          >
+            <div className="relative bg-card rounded-[23px] p-5 flex items-center gap-5 text-left transition-all duration-300 group-hover:bg-muted/50">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 bg-primary/10 text-primary shadow-lg shadow-primary/5">
+                <BrainCircuit className="w-8 h-8" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-black text-card-foreground">
+                    Cerebro Experto ABA
+                  </h3>
+                  <span className="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Beta</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Análisis funcional de conducta avanzado. Descubre por qué haces lo que haces.
+                </p>
+              </div>
+            </div>
+          </motion.button>
+        </div>
       </div>
 
-      {/* Optional: Summary or Insight */}
+      {/* Dato Herbie: Fixed at bottom */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="mt-12 p-4 rounded-2xl bg-muted/30 border border-muted/50 text-center"
+        className="p-6 bg-card border-t border-border/50 text-center pb-safe-or-8 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
       >
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+        <p className="text-[10px] uppercase tracking-widest text-primary font-black mb-2">
           Dato HERBIE
         </p>
-        <motion.p
-          key={quoteIndex}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.4 }}
-          className="text-sm italic text-muted-foreground mt-2"
-        >
-          "{ABA_QUOTES[quoteIndex]}"
-        </motion.p>
+        <div className="h-12 flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={quoteIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+              className="text-sm italic text-muted-foreground max-w-sm"
+            >
+              "{ABA_QUOTES[quoteIndex]}"
+            </motion.p>
+          </AnimatePresence>
+        </div>
       </motion.div>
     </div>
   );
