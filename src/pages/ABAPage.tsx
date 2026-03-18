@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, BrainCircuit, Sparkles, Target, Zap, Microscope, Send, Loader2, Brain, BookOpen } from "lucide-react";
+import { ArrowLeft, BrainCircuit, Sparkles, Send, BookOpen } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 interface Message {
@@ -179,32 +179,6 @@ const ABAPage = () => {
         </div>
       </div>
 
-      {/* Control Center */}
-      <div className="bg-card border-b p-3 flex items-center justify-center sm:justify-start overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase">Modo:</span>
-          <div className="flex bg-muted rounded-lg p-0.5">
-            {[
-              { id: 'all', label: 'Todo' },
-              { id: 'teoria', label: 'Teoría' },
-              { id: 'practica', label: 'Práctica' },
-              { id: 'teorico_practico', label: 'Teo-Prac' }
-            ].map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setSelectedMode(m.id as any)}
-                className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${
-                  selectedMode === m.id 
-                    ? "bg-background shadow-sm text-primary" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Chat Area */}
       <div 
@@ -251,17 +225,6 @@ const ABAPage = () => {
               </div>
             </motion.div>
           ))}
-          {isTyping && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex justify-start"
-            >
-              <div className="bg-muted px-4 py-3 rounded-2xl rounded-tl-none">
-                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-              </div>
-            </motion.div>
-          )}
 
           {/* Stop Button Inside Chat */}
           <AnimatePresence>
@@ -290,26 +253,8 @@ const ABAPage = () => {
         </AnimatePresence>
       </div>
 
-      {/* ABC Hint + Input: sticky bottom container */}
+      {/* Input: sticky bottom container */}
       <div className="sticky bottom-0 z-10 bg-background border-t">
-        {/* ABC Model Hint */}
-        <div className="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar bg-background/50 backdrop-blur-sm">
-          {[
-            { icon: Target, label: "Situación/A", color: "text-blue-500 bg-blue-500/10" },
-            { icon: Zap, label: "Conducta/B", color: "text-amber-500 bg-amber-500/10" },
-            { icon: Microscope, label: "Consecuente/C", color: "text-emerald-500 bg-emerald-500/10" },
-          ].map((hint, i) => (
-            <button
-              key={i}
-              onClick={() => setInput(prev => prev + (prev ? " " : "") + hint.label + ": ")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-[10px] font-bold border border-transparent hover:border-current transition-all ${hint.color}`}
-            >
-              <hint.icon className="w-3 h-3" />
-              {hint.label}
-            </button>
-          ))}
-        </div>
-
         {/* Input Area */}
         <div className="p-4 pb-24 lg:pb-6">
 
