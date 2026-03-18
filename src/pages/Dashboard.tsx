@@ -154,7 +154,11 @@ const Dashboard = () => {
             <span className="text-xs ml-1 opacity-80">registros</span>
           </div>
           <div>
-            <span className="text-2xl font-bold">4.8</span>
+            <span className="text-2xl font-bold">
+              {logs && logs.length > 0 
+                ? (logs.reduce((acc: number, log: any) => acc + (Number(log.data.intensity) || 0), 0) / logs.length).toFixed(1)
+                : 0}
+            </span>
             <span className="text-xs ml-1 opacity-80">intensidad media</span>
           </div>
         </div>
