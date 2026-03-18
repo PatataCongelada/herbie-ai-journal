@@ -17,6 +17,7 @@ const RegisterPage = () => {
     conduct: "",
     situation: "",
     thoughts: "",
+    phase: "intervencion", // Default phase
   });
 
   const handleSmartFill = async () => {
@@ -31,13 +32,14 @@ const RegisterPage = () => {
       if (!response.ok) throw new Error("Error extrayendo datos");
       const data = await response.json();
       
-      setForm({
-        emotion: data.emotion || form.emotion,
-        intensity: data.intensity || form.intensity,
-        conduct: data.conduct || form.conduct,
-        situation: data.situation || form.situation,
-        thoughts: data.thoughts || form.thoughts,
-      });
+      setForm(prev => ({
+        ...prev,
+        emotion: data.emotion || prev.emotion,
+        intensity: data.intensity || prev.intensity,
+        conduct: data.conduct || prev.conduct,
+        situation: data.situation || prev.situation,
+        thoughts: data.thoughts || prev.thoughts,
+      }));
       
       toast.success("Campos extraídos correctamente");
       setSmartText("");
@@ -259,6 +261,36 @@ const RegisterPage = () => {
             rows={3}
             className="w-full bg-muted rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
           />
+        </div>
+
+        {/* Clinical Phase */}
+        <div className="space-y-2 pt-2">
+          <label className="text-xs font-black text-primary uppercase tracking-widest pl-1">Fase Clínica</label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { id: 'pre', label: 'PRE', color: 'bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800' },
+              { id: 'intervencion', label: 'INTER', color: 'bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-800' },
+              { id: 'post', label: 'POST', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-800' },
+            ].map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setForm({ ...form, phase: p.id })}
+                className={`py-2 px-3 rounded-xl text-[10px] font-black border transition-all ${
+                  form.phase === p.id 
+                    ? p.color + " ring-2 ring-current ring-offset-2 ring-offset-background scale-95" 
+                    : "bg-muted/50 text-muted-foreground border-transparent grayscale opacity-70 hover:opacity-100 hover:grayscale-0"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-[9px] text-muted-foreground italic px-1">
+            {form.phase === 'pre' && "Línea base: Comportamiento natural sin intervención."}
+            {form.phase === 'intervencion' && "Tratamiento activo: Aplicando nuevas contingencias."}
+            {form.phase === 'post' && "Seguimiento: Evaluación tras retirar el refuerzo directo."}
+          </p>
         </div>
 
         {/* Submit */}

@@ -212,8 +212,17 @@ const Dashboard = () => {
             logs.map((log, i) => {
               const intensity = log.data.intensity || 5;
               const emotion = log.data.emotion || "Registro";
+              const phase = log.data.phase || "intervencion";
               const time = formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: es });
               
+              const phaseStyles: Record<string, { label: string, color: string }> = {
+                pre: { label: 'PRE', color: 'bg-blue-500/10 text-blue-600 border-blue-200' },
+                intervencion: { label: 'INT', color: 'bg-amber-500/10 text-amber-600 border-amber-200' },
+                post: { label: 'POST', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-200' },
+              };
+
+              const currentPhase = phaseStyles[phase] || phaseStyles.intervencion;
+
               return (
                 <div 
                   key={log.id} 
@@ -231,7 +240,12 @@ const Dashboard = () => {
                       }`}
                     />
                     <div>
-                      <p className="text-sm font-medium text-card-foreground capitalize">{emotion}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-card-foreground capitalize">{emotion}</p>
+                        <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md border ${currentPhase.color}`}>
+                          {currentPhase.label}
+                        </span>
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {log.data.event_date ? `Suceso: ${log.data.event_date}` : (log.data.conduct || "Sin conducta")} · {time}
                       </p>

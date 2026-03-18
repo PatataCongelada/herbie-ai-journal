@@ -44,11 +44,13 @@ const StatsPage = () => {
         dayName: format(date, "eee", { locale: es }),
         intensity: 0,
         count: 0,
-        totalIntensity: 0
+        totalIntensity: 0,
+        phase: 'intervencion' as string
       };
     });
 
     const categories: Record<string, number> = {};
+    const phases: Record<string, number> = {};
     let totalIntensityOverall = 0;
     let recordsCountOverall = 0;
 
@@ -56,6 +58,7 @@ const StatsPage = () => {
       const logDate = parseISO(log.created_at);
       const intensity = Number(log.data.intensity) || 0;
       const conduct = log.data.emotion || log.data.conduct || "Otros";
+      const phase = log.data.phase || "intervencion";
 
       if (intensity > 0) {
         totalIntensityOverall += intensity;
@@ -64,6 +67,7 @@ const StatsPage = () => {
 
       // Agregación para conductData
       categories[conduct] = (categories[conduct] || 0) + 1;
+      phases[phase] = (phases[phase] || 0) + 1;
 
       // Agregación para weeklyData (últimos 7 días)
       last7Days.forEach(day => {
@@ -73,6 +77,7 @@ const StatsPage = () => {
         })) {
           day.count++;
           day.totalIntensity += intensity;
+          day.phase = phase; // Predominate/last phase for that day
         }
       });
     });
@@ -80,7 +85,8 @@ const StatsPage = () => {
     const weeklyData = last7Days.map(day => ({
       day: day.dayName,
       intensity: day.count > 0 ? Number((day.totalIntensity / day.count).toFixed(1)) : 0,
-      records: day.count
+      records: day.count,
+      phase: day.phase
     }));
 
     const conductData = Object.entries(categories)
@@ -96,7 +102,7 @@ const StatsPage = () => {
       const dateStr = format(subDays(current, i), 'yyyy-MM-dd');
       if (sortedDates.includes(dateStr)) {
         racha++;
-      } else if (i > 0) { // Si hoy no hay pero ayer sí, la racha sigue. Si rompe en el pasado, para.
+      } else if (i > 0) { 
         break;
       }
     }
@@ -104,6 +110,7 @@ const StatsPage = () => {
     return {
       weeklyData,
       conductData,
+      phases,
       summary: {
         count: logs.length,
         avg: recordsCountOverall > 0 ? (totalIntensityOverall / recordsCountOverall).toFixed(1) : 0,
@@ -112,7 +119,16 @@ const StatsPage = () => {
     };
   };
 
-  const { weeklyData, conductData, summary } = processData();
+  const { weeklyData, conductData, phases, summary } = processData();
+
+  const getPhaseColor = (phase: string) => {
+    switch (phase) {
+      case 'pre': return 'hsl(217, 91%, 60%)'; // Blue
+      case 'intervencion': return 'hsl(45, 93%, 47%)'; // Amber
+      case 'post': return 'hsl(160, 84%, 39%)'; // Green
+      default: return 'hsl(var(--primary))';
+    }
+  };
 
   if (isLoading) {
     return (
@@ -165,7 +181,15 @@ const StatsPage = () => {
         className="herbie-card p-4"
       >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Intensidad (7 días)</h3>
+          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Evolución de Intensidad</h3>
+          <div className="flex gap-2">
+            {['pre', 'intervencion', 'post'].map(p => (
+              <div key={p} className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getPhaseColor(p) }} />
+                <span className="text-[8px] font-bold text-muted-foreground uppercase">{p === 'intervencion' ? 'Int' : p}</span>
+              </div>
+            ))}
+          </div>
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={weeklyData}>
@@ -196,10 +220,24 @@ const StatsPage = () => {
             <Line
               type="monotone"
               dataKey="intensity"
-              stroke="hsl(var(--primary))"
-              strokeWidth={3}
-              dot={{ r: 4, fill: "hsl(var(--primary))", strokeWidth: 2, stroke: "hsl(var(--card))" }}
-              activeDot={{ r: 6, strokeWidth: 0 }}
+              stroke="hsl(var(--muted-foreground))"
+              strokeWidth={2}
+              strokeOpacity={0.3}
+              dot={(props: any) => {
+                const { cx, cy, payload } = props;
+                if (!payload.records) return null;
+                return (
+                  <circle 
+                    cx={cx} 
+                    cy={cy} 
+                    r={5} 
+                    fill={getPhaseColor(payload.phase)} 
+                    stroke="white" 
+                    strokeWidth={2} 
+                  />
+                );
+              }}
+              activeDot={{ r: 7, strokeWidth: 0 }}
               animationDuration={1500}
             />
           </LineChart>
@@ -260,10 +298,11 @@ const StatsPage = () => {
           {logs && logs.length > 0 ? (
             <>
               <p className="text-sm text-foreground/80 leading-relaxed font-medium">
-                Se han detectado <span className="text-primary font-bold">{summary.count} registros</span> en tu historial clínico. 
+                Resumen de fases: <span className="text-blue-500">{phases.pre || 0} Pre</span> · <span className="text-amber-500">{phases.intervencion || 0} Int</span> · <span className="text-emerald-500">{phases.post || 0} Post</span>
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Herbie está analizando tus patrones de rumiación y activación. Mantén tu racha de {summary.racha} días para obtener un análisis funcional más profundo.
+                Herbie está comparando tu línea base con los progresos actuales. 
+                {Number(summary.avg) > 7 ? " ⚠️ La intensidad media es alta, revisa tus estrategias de afrontamiento." : " ✅ Mantener registros constantes es clave para un buen Análisis Funcional."}
               </p>
             </>
           ) : (
