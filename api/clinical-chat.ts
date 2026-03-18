@@ -73,7 +73,7 @@ ${modeInstructions}
 4. **Científico-Humanista**: Tu base es 100% científica (ABA), pero tu entrega es 100% humana. No eres una enciclopedia, eres un mentor.
 
 ### Uso del Contexto:
-Usa el siguiente contexto extraído de los manuales para enriquecer la charla. Si no hay datos específicos en el contexto sobre algo, usa tus conocimientos generales de ABA para razonar juntos, pero dilo de forma natural (ej: "Basándome en lo que sabemos sobre [X], podríamos pensar que...").
+Usa el siguiente contexto extraído de los manuales para enriquecer la charla. Si el contexto NO contiene la información necesaria para responder a la pregunta, dilo claramente (ej: "No dispongo de esa información específica en mis manuales actuales"). No inventes datos técnicos si no están en el contexto, pero intenta razonar basándote en lo que sí sabemos de ABA.
 
 Contexto clínico:
 ${context}`;
@@ -84,7 +84,8 @@ ${context}`;
       systemInstruction: systemPrompt 
     });
 
-    const rawMessages = messages.slice(0, -1);
+    // Limitamos el historial a los últimos 10 mensajes para evitar saturar el contexto
+    const rawMessages = messages.slice(-11, -1); 
     const chatHistory: { role: string, parts: any[] }[] = [];
     
     // Filtramos para asegurar que empiece siempre por 'user' y alterne
@@ -99,8 +100,6 @@ ${context}`;
         });
         expectedRole = expectedRole === 'user' ? 'model' : 'user';
       }
-      // Si recibimos un 'model' cuando esperábamos 'user' (ej. el saludo inicial), lo ignoramos.
-      // Si recibimos dos 'user' seguidos, ignoramos el segundo (o los agrupamos, pero ignorar es más seguro para la API).
     }
 
     console.log('--- DEBUG CHAT ---');
@@ -117,6 +116,18 @@ ${context}`;
     return res.status(200).json({ text: response.text() });
   } catch (error: any) {
     console.error('Error en clinical-chat:', error);
-    return res.status(500).json({ error: error.message });
+    
+    // Manejo específico de cuotas/límites
+    if (error.status === 429 || error.message?.includes('429')) {
+      return res.status(429).json({ 
+        text: "Espera un momento, he alcanzado un límite de consultas. Por favor, dame unos segundos para descansar y vuelve a intentarlo.",
+        error: 'RATE_LIMIT_REACHED'
+      });
+    }
+
+    return res.status(500).json({ 
+      text: "⚠️ He tenido un problema técnico al procesar tu mensaje. ¿Podrías reintentarlo?",
+      error: error.message 
+    });
   }
 }

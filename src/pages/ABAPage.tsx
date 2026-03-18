@@ -90,7 +90,10 @@ const ABAPage = () => {
         })
       });
 
-      if (!response.ok) throw new Error("Error en la conexión");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.text || "⚠️ No he podido conectar con mi base de conocimientos. ¿Podrías reintentarlo?");
+      }
       
       const data = await response.json();
 
@@ -103,11 +106,11 @@ const ABAPage = () => {
         isStreaming: true
       };
       setMessages((prev) => [...prev, botMsg]);
-    } catch (error) {
+    } catch (error: any) {
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "⚠️ No he podido conectar con mi base de conocimientos. ¿Podrías reintentarlo?",
+        content: error.message || "⚠️ Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMsg]);
