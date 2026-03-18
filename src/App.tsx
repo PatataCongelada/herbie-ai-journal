@@ -10,6 +10,7 @@ import RegisterPage from "./pages/RegisterPage";
 import StatsPage from "./pages/StatsPage";
 import SettingsPage from "./pages/SettingsPage";
 import PlanSelection from "./pages/PlanSelection";
+import HomePage from "./pages/HomePage";
 import ABAPage from "./pages/ABAPage";
 import LearningMode from "./pages/LearningMode";
 import NotFound from "./pages/NotFound";
@@ -23,7 +24,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<PlanSelection />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/plans" element={<PlanSelection />} />
           <Route element={<AppLayout />}>
             <Route path="/dashboard/:planId" element={<Dashboard />} />
             <Route path="/register/:planId" element={<RegisterPage />} />
