@@ -9,6 +9,7 @@ console.log('✅ Handler clinical-chat cargado.');
 
 import extractFieldsHandler from './api/extract-fields.ts';
 import pingHandler from './api/ping.ts';
+import deleteRecordHandler from './api/delete-record.ts';
 import bodyParser from 'body-parser';
 
 console.log('✅ Todos los handlers cargados.');
@@ -42,6 +43,8 @@ const wrapHandler = (handler: any) => async (req: any, res: any) => {
 app.post('/api/clinical-chat', wrapHandler(clinicalChatHandler));
 app.post('/api/extract-fields', wrapHandler(extractFieldsHandler));
 app.get('/api/ping', wrapHandler(pingHandler));
+app.post('/api/delete-record', wrapHandler(deleteRecordHandler));
+app.delete('/api/delete-record', wrapHandler(deleteRecordHandler));
 
 const PORT = 3000;
 app.listen(PORT, () => {

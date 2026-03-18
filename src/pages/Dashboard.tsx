@@ -42,12 +42,16 @@ const Dashboard = () => {
   // Mutation for deleting a record
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('autorregistros')
-        .delete()
-        .eq('id', id);
+      const response = await fetch('/api/delete-record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al eliminar");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['autorregistros'] });
