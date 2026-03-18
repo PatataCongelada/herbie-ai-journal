@@ -11,6 +11,7 @@ import StatsPage from "./pages/StatsPage";
 import SettingsPage from "./pages/SettingsPage";
 import PlanSelection from "./pages/PlanSelection";
 import ABAPage from "./pages/ABAPage";
+import LearningMode from "./pages/LearningMode";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/aba" element={<ABAPage />} />
+            <Route path="/learning" element={<LearningMode />} />
           </Route>
           <Route path="/chat" element={<ChatPage />} />
           <Route path="*" element={<NotFound />} />
