@@ -222,6 +222,26 @@ const ABAPage = () => {
               </div>
             </motion.div>
           )}
+
+          {/* Stop Button Inside Chat */}
+          <AnimatePresence>
+            {(isTyping || messages.some(m => m.isStreaming)) && !isGlobalStop && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="flex justify-center pt-2"
+              >
+                <button
+                  onClick={() => setIsGlobalStop(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive border border-destructive/20 rounded-full text-xs font-bold hover:bg-destructive/20 transition-all shadow-sm"
+                >
+                  <div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
+                  Detener Herbie
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </AnimatePresence>
       </div>
 
@@ -246,21 +266,6 @@ const ABAPage = () => {
       {/* Input Area */}
       <div className="p-4 bg-background border-t pb-24 lg:pb-8">
         <div className="relative group max-w-lg mx-auto">
-          {/* Stop Button */}
-          <AnimatePresence>
-            {(isTyping || messages.some(m => m.isStreaming)) && (
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                onClick={() => setIsGlobalStop(true)}
-                className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-full text-xs font-bold shadow-lg hover:scale-105 transition-all"
-              >
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                Detener Herbie
-              </motion.button>
-            )}
-          </AnimatePresence>
 
           <textarea
             value={input}
