@@ -2,24 +2,36 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, ArrowRight, BrainCircuit } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
-const ABA_QUOTES = [
-  "Toda conducta es un mensaje sin palabras.",
-  "El ambiente no te define, pero te da las cartas.",
-  "Mide lo que te importa. Lo que no se mide, se olvida.",
-  "El cambio ocurre fragmento a fragmento.",
-];
+const ABA_QUOTES = {
+  es: [
+    "Toda conducta es un mensaje sin palabras.",
+    "El ambiente no te define, pero te da las cartas.",
+    "Mide lo que te importa. Lo que no se mide, se olvida.",
+    "El cambio ocurre fragmento a fragmento.",
+  ],
+  en: [
+    "Every behavior is a wordless message.",
+    "The environment doesn't define you, but it deals the cards.",
+    "Measure what matters. What isn't measured is forgotten.",
+    "Change happens piece by piece.",
+  ]
+};
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { lang, t } = useLanguage();
   const [quoteIndex, setQuoteIndex] = useState(0);
+
+  const quotes = ABA_QUOTES[lang];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setQuoteIndex(prev => (prev + 1) % ABA_QUOTES.length);
+      setQuoteIndex(prev => (prev + 1) % quotes.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [quotes.length]);
 
   return (
     <div className="flex flex-col h-dvh bg-background overflow-hidden relative">
@@ -43,7 +55,7 @@ const HomePage = () => {
               HERBIE
             </h1>
             <p className="text-[10px] uppercase tracking-[0.3em] text-primary font-bold">
-              AI Journal & Clinical Assistant
+              {t('home.assistant')}
             </p>
           </div>
         </motion.div>
@@ -51,13 +63,13 @@ const HomePage = () => {
         {/* Dynamic Quote */}
         <div className="h-8">
            <motion.p
-              key={quoteIndex}
+              key={`${lang}-${quoteIndex}`}
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
               className="text-xs italic text-muted-foreground/60 max-w-[240px]"
             >
-              "{ABA_QUOTES[quoteIndex]}"
+              "{quotes[quoteIndex]}"
             </motion.p>
         </div>
 
@@ -74,7 +86,7 @@ const HomePage = () => {
           >
             <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative flex items-center justify-center gap-4">
-              <span className="text-xl font-black uppercase tracking-widest">Planes</span>
+              <span className="text-xl font-black uppercase tracking-widest">{t('home.planes')}</span>
               <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
@@ -84,14 +96,14 @@ const HomePage = () => {
             className="w-full h-14 bg-card border border-border/50 text-card-foreground rounded-2xl flex items-center justify-center gap-3 text-sm font-bold hover:bg-muted transition-colors"
           >
             <BrainCircuit className="w-5 h-5 text-primary" />
-            Cerebro Experto ABA
+            {t('home.aba_brain')}
           </button>
         </motion.div>
       </div>
 
       {/* Footer Branding */}
       <div className="p-8 text-center opacity-30 text-[10px] font-bold tracking-widest grayscale">
-        H.E.R.B.I.E. SYSTEM V2.5
+        {t('home.system_version')}
       </div>
     </div>
   );

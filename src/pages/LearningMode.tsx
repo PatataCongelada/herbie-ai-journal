@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, GraduationCap, CheckCircle2, ChevronRight, Sparkles, Loader2, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface LearningStep {
   content: string;
@@ -18,6 +19,7 @@ interface LearningProgram {
 
 const LearningMode = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [concept, setConcept] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [program, setProgram] = useState<LearningProgram | null>(null);
@@ -45,10 +47,10 @@ const LearningMode = () => {
       setUserAnswer("");
       setShowFeedback(false);
       setShowPrompt(true);
-      toast.success("Programa de aprendizaje generado");
+      toast.success(t('learn.generate_success'));
     } catch (error) {
       console.error(error);
-      toast.error("No he podido generar el programa. Prueba con otro concepto.");
+      toast.error(t('learn.generate_error'));
     } finally {
       setIsGenerating(false);
     }
@@ -74,7 +76,7 @@ const LearningMode = () => {
           // Fading prompts: Show prompt for the first 3 steps, then hide it
           setShowPrompt(currentStepIndex < 2);
         } else {
-          toast.success("¡Enhorabuena! Has completado el aprendizaje de " + program?.concept);
+          toast.success(t('learn.complete_success') + program?.concept);
         }
       }, 1500);
     }
@@ -88,8 +90,8 @@ const LearningMode = () => {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-lg font-bold text-foreground">Modo Aprendizaje</h1>
-          <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Skinner Method Beta</p>
+          <h1 className="text-lg font-bold text-foreground">{t('learn.title')}</h1>
+          <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{t('learn.skinner_method')}</p>
         </div>
       </div>
 
@@ -107,7 +109,7 @@ const LearningMode = () => {
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <GraduationCap className="w-5 h-5 text-primary" />
                 </div>
-                <h2 className="text-sm font-bold">¿Qué quieres aprender hoy?</h2>
+                <h2 className="text-sm font-bold">{t('learn.search_title')}</h2>
               </div>
               
               <div className="space-y-4">
@@ -117,7 +119,7 @@ const LearningMode = () => {
                     type="text"
                     value={concept}
                     onChange={(e) => setConcept(e.target.value)}
-                    placeholder="Ej: Moldeamiento, Refuerzo Negativo..."
+                    placeholder={t('learn.search_placeholder')}
                     className="w-full bg-background border border-muted rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none"
                     onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
                   />
@@ -132,7 +134,7 @@ const LearningMode = () => {
                   ) : (
                     <Sparkles className="w-4 h-4" />
                   )}
-                  Empezar Aprendizaje Sin Errores
+                  {t('learn.search_btn')}
                 </button>
               </div>
             </div>
@@ -140,7 +142,7 @@ const LearningMode = () => {
             <div className="p-4 rounded-xl border border-dashed border-muted flex gap-3 italic">
               <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground">
-                Inspirado en la Enseñanza Programada de Skinner. Descomponemos conceptos complejos en pasos mínimos para asegurar que nunca te equivoques.
+                {t('learn.skinner_desc')}
               </p>
             </div>
           </motion.div>
@@ -154,7 +156,7 @@ const LearningMode = () => {
             {/* Progress Bar */}
             <div className="space-y-2">
               <div className="flex justify-between items-end">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Progreso: {program.concept}</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('learn.progress_label')}: {program.concept}</span>
                 <span className="text-xs font-bold text-primary">{currentStepIndex + 1} / {program.steps.length}</span>
               </div>
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
@@ -189,7 +191,7 @@ const LearningMode = () => {
                         type="text"
                         value={userAnswer}
                         onChange={(e) => setUserAnswer(e.target.value)}
-                        placeholder="Escribe tu respuesta..."
+                        placeholder={t('learn.placeholder')}
                         className="w-full bg-muted/30 border-b-2 border-primary/20 rounded-t-lg px-4 py-3 text-sm focus:border-primary outline-none transition-all"
                         onKeyDown={(e) => e.key === 'Enter' && handleCheckAnswer()}
                         disabled={showFeedback && isCorrect}
@@ -201,7 +203,7 @@ const LearningMode = () => {
                           animate={{ opacity: 1 }}
                           className="absolute -top-6 right-0 text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase tracking-tighter"
                         >
-                          Ayuda: {currentStep?.prompt}
+                          {t('learn.help_label')}: {currentStep?.prompt}
                         </motion.p>
                       )}
                     </div>
@@ -218,12 +220,12 @@ const LearningMode = () => {
                           {isCorrect ? (
                             <>
                               <CheckCircle2 className="w-4 h-4" />
-                              ¡Excelente! Refuerzo positivo enviado. Pasamos al siguiente marco.
+                              {t('learn.feedback_correct')}
                             </>
                           ) : (
                             <>
                               <Info className="w-4 h-4" />
-                              Casi. Pista: Es {currentStep?.answer}. Inténtalo de nuevo.
+                              {t('learn.feedback_hint')}{currentStep?.answer}{t('learn.feedback_hint_end')}
                             </>
                           )}
                         </motion.div>
@@ -236,7 +238,7 @@ const LearningMode = () => {
                         disabled={!userAnswer.trim()}
                         className="w-full py-3 bg-primary text-primary-foreground rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                       >
-                        Comprobar <ChevronRight className="w-4 h-4" />
+                        {t('learn.check_btn')} <ChevronRight className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -248,7 +250,7 @@ const LearningMode = () => {
               onClick={() => setProgram(null)}
               className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors mx-auto block"
             >
-              Abandonar sesión actual
+              {t('learn.abandon_btn')}
             </button>
           </motion.div>
         )}

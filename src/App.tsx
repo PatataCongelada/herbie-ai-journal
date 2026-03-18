@@ -14,15 +14,20 @@ import HomePage from "./pages/HomePage";
 import ABAPage from "./pages/ABAPage";
 import LearningMode from "./pages/LearningMode";
 import NotFound from "./pages/NotFound";
+import LanguageSwitcher from "./components/LanguageSwitcher";
+
+import { LanguageProvider } from "./context/LanguageContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+        <LanguageSwitcher />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/plans" element={<PlanSelection />} />
@@ -39,7 +44,8 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
+  </LanguageProvider>
+</QueryClientProvider>
 );
 
 export default App;

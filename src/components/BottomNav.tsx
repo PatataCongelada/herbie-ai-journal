@@ -1,18 +1,20 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { MessageCircle, PenLine, BarChart3, Settings, Activity } from "lucide-react";
 import { motion } from "framer-motion";
-
-const navItems = [
-  { path: "/plans", label: "Inicio", icon: MessageCircle },
-  { path: "/aba", label: "Cerebro ABA", icon: Activity },
-  { path: "/register", label: "Registrar", icon: PenLine },
-  { path: "/stats", label: "Stats", icon: BarChart3 },
-  { path: "/settings", label: "Ajustes", icon: Settings },
-];
+import { useLanguage } from "@/context/LanguageContext";
 
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const navItems = [
+    { path: "/plans", label: t('nav.home'), icon: MessageCircle },
+    { path: "/aba", label: t('nav.aba'), icon: Activity },
+    { path: "/register", label: t('nav.register'), icon: PenLine },
+    { path: "/stats", label: t('nav.stats'), icon: BarChart3 },
+    { path: "/settings", label: t('nav.settings'), icon: Settings },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border backdrop-blur-lg bg-opacity-95">

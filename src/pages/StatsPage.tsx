@@ -7,7 +7,8 @@ import {
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { format, subDays, startOfDay, isWithinInterval, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
+import { useLanguage } from "@/context/LanguageContext";
 
 const barColors = [
   "hsl(var(--primary))",
@@ -19,6 +20,8 @@ const barColors = [
 
 const StatsPage = () => {
   const navigate = useNavigate();
+  const { t, lang } = useLanguage();
+  const dateLocale = lang === 'es' ? es : enUS;
 
   const { data: logs, isLoading } = useQuery({
     queryKey: ['autorregistros-stats'],
@@ -41,7 +44,7 @@ const StatsPage = () => {
       const date = subDays(new Date(), 6 - i);
       return {
         date,
-        dayName: format(date, "eee", { locale: es }),
+        dayName: format(date, "eee", { locale: dateLocale }),
         intensity: 0,
         count: 0,
         totalIntensity: 0,
@@ -57,7 +60,7 @@ const StatsPage = () => {
     logs.forEach(log => {
       const logDate = parseISO(log.created_at);
       const intensity = Number(log.data.intensity) || 0;
-      const conduct = log.data.emotion || log.data.conduct || "Otros";
+      const conduct = log.data.emotion || log.data.conduct || (lang === 'es' ? "Otros" : "Others");
       const phase = log.data.phase || "intervencion";
 
       if (intensity > 0) {
@@ -146,10 +149,10 @@ const StatsPage = () => {
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-xl transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-lg font-bold text-foreground">Estadísticas</h1>
+          <h1 className="text-lg font-bold text-foreground">{t('stats.title')}</h1>
         </div>
         <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-[10px] font-bold text-primary hover:bg-primary/20 transition-all">
-          <Download className="w-3 h-3" /> EXPORTAR
+          <Download className="w-3 h-3" /> {t('stats.export')}
         </button>
       </div>
 
@@ -161,9 +164,9 @@ const StatsPage = () => {
         className="grid grid-cols-3 gap-3"
       >
         {[
-          { label: "Registros", value: summary.count, sub: "totales" },
-          { label: "Intensidad", value: summary.avg, sub: "promedio" },
-          { label: "Racha", value: summary.racha, sub: "días seguidos" },
+          { label: t('stats.records'), value: summary.count, sub: t('stats.total') },
+          { label: t('stats.intensity'), value: summary.avg, sub: t('stats.average') },
+          { label: t('stats.streak'), value: summary.racha, sub: t('stats.days_streak') },
         ].map((s) => (
           <div key={s.label} className="herbie-card p-3 text-center border-primary/5">
             <p className="text-xl font-black text-foreground">{s.value}</p>
@@ -181,12 +184,14 @@ const StatsPage = () => {
         className="herbie-card p-4"
       >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Evolución de Intensidad</h3>
+          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('stats.evolution')}</h3>
           <div className="flex gap-2">
             {['pre', 'intervencion', 'post'].map(p => (
               <div key={p} className="flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getPhaseColor(p) }} />
-                <span className="text-[8px] font-bold text-muted-foreground uppercase">{p === 'intervencion' ? 'Int' : p}</span>
+                <span className="text-[8px] font-bold text-muted-foreground uppercase">
+                  {p === 'intervencion' ? (lang === 'es' ? 'Int' : 'Int') : (p === 'pre' ? t('dash.phase_pre') : t('dash.phase_post'))}
+                </span>
               </div>
             ))}
           </div>
@@ -252,7 +257,7 @@ const StatsPage = () => {
           transition={{ duration: 0.2, delay: 0.1 }}
           className="herbie-card p-4"
         >
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Conductas Frecuentes</h3>
+          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">{t('stats.frequent_conducts')}</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={conductData} layout="vertical" margin={{ left: -20, right: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" horizontal={false} opacity={0.3} />
@@ -292,22 +297,22 @@ const StatsPage = () => {
       >
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-4 h-4 text-primary" />
-          <h3 className="text-xs font-black text-primary uppercase tracking-widest">Herbie Insights</h3>
+          <h3 className="text-xs font-black text-primary uppercase tracking-widest">{t('stats.insights_title')}</h3>
         </div>
         <div className="space-y-3">
           {logs && logs.length > 0 ? (
             <>
               <p className="text-sm text-foreground/80 leading-relaxed font-medium">
-                Resumen de fases: <span className="text-blue-500">{phases.pre || 0} Pre</span> · <span className="text-amber-500">{phases.intervencion || 0} Int</span> · <span className="text-emerald-500">{phases.post || 0} Post</span>
+                {t('stats.phases_summary')}: <span className="text-blue-500">{phases.pre || 0} {t('dash.phase_pre')}</span> · <span className="text-amber-500">{phases.intervencion || 0} INT</span> · <span className="text-emerald-500">{phases.post || 0} {t('dash.phase_post')}</span>
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Herbie está comparando tu línea base con los progresos actuales. 
-                {Number(summary.avg) > 7 ? " ⚠️ La intensidad media es alta, revisa tus estrategias de afrontamiento." : " ✅ Mantener registros constantes es clave para un buen Análisis Funcional."}
+                {t('stats.insight_comparison')}
+                {Number(summary.avg) > 7 ? t('stats.insight_high_intensity') : t('stats.insight_low_intensity')}
               </p>
             </>
           ) : (
             <p className="text-xs text-muted-foreground italic">
-              Aún no hay suficientes datos para generar insights. ¡Prueba a mandarle un audio a Herbie para empezar!
+              {t('stats.no_data_insight')}
             </p>
           )}
         </div>

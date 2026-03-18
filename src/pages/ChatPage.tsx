@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, Send, BookOpen, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Message {
   id: string;
@@ -11,19 +12,20 @@ interface Message {
   isExpert?: boolean;
 }
 
-const initialMessages: Message[] = [
-  {
-    id: "1",
-    role: "assistant",
-    content: "Hola, soy el Cerebro Experto de Herbie 🧠 Clínicamente entrenado para ayudarte con tus manuales de Tomás Carrasco. ¿Qué duda técnica tienes hoy?",
-    timestamp: new Date(),
-    isExpert: true
-  },
-];
-
 const ChatPage = () => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const { t } = useLanguage();
+  
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      role: "assistant",
+      content: t('chat.welcome'),
+      timestamp: new Date(),
+      isExpert: true
+    },
+  ]);
+  
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -71,7 +73,7 @@ const ChatPage = () => {
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "⚠️ Perdona, he tenido un problema conectando con mi base de conocimientos. ¿Puedes intentarlo de nuevo?",
+        content: t('chat.error'),
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -91,12 +93,12 @@ const ChatPage = () => {
           <Brain className="w-4 h-4 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h1 className="text-sm font-semibold text-foreground">Cerebro Experto ABA</h1>
+          <h1 className="text-sm font-semibold text-foreground">{t('chat.expert_aba')}</h1>
           <p className="text-xs text-muted-foreground flex items-center gap-1 italic">
-            <BookOpen className="w-3 h-3 text-primary" /> Modo Consulta Avanzada
+            <BookOpen className="w-3 h-3 text-primary" /> {t('chat.advanced_mode')}
           </p>
         </div>
-        <button className="text-xs font-medium text-accent hover:underline">Cambiar Manual</button>
+        <button className="text-xs font-medium text-accent hover:underline">{t('chat.change_manual')}</button>
       </div>
 
       {/* Messages */}
@@ -120,7 +122,7 @@ const ChatPage = () => {
                 {msg.content}
                 {msg.isExpert && (
                   <div className="mt-2 pt-2 border-t border-border/50 text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-1">
-                    <Brain className="w-3 h-3" /> Respuesta basada en manuales
+                    <Brain className="w-3 h-3" /> {t('chat.manual_based')}
                   </div>
                 )}
               </div>
@@ -152,7 +154,7 @@ const ChatPage = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Escribe tu consulta..."
+            placeholder={t('chat.placeholder')}
             className="flex-1 bg-muted rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <button

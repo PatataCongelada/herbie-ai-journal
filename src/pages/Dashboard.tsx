@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   Dialog,
   DialogContent,
@@ -29,15 +30,18 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { planId } = useParams();
   const queryClient = useQueryClient();
+  const { lang, t } = useLanguage();
   const [selectedLog, setSelectedLog] = useState<any>(null);
 
+  const dateLocale = lang === 'es' ? es : enUS;
+
   const planTitles: Record<string, string> = {
-    activacion: "Activación Conductual",
-    rumia: "Rumia",
-    meditacion: "Meditación",
+    activacion: t('plan.activacion'),
+    rumia: t('plan.rumia'),
+    meditacion: t('plan.meditacion'),
   };
 
-  const currentPlanTitle = planId ? planTitles[planId] || "Dashboard" : "Dashboard";
+  const currentPlanTitle = planId ? planTitles[planId] || t('dash.title') : t('dash.title');
 
   // Mutation for deleting a record
   const deleteMutation = useMutation({
@@ -50,17 +54,17 @@ const Dashboard = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error al eliminar");
+        throw new Error(errorData.error || t('dash.delete_error'));
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['autorregistros'] });
       setSelectedLog(null);
-      toast.success("Registro eliminado correctamente");
+      toast.success(t('dash.delete_success'));
     },
     onError: (error: any) => {
       console.error("Error al eliminar:", error);
-      toast.error("Error al eliminar el registro. Verifica los permisos de Supabase.");
+      toast.error(t('dash.delete_error'));
     }
   });
 
@@ -88,29 +92,29 @@ const Dashboard = () => {
 
   const cards = [
     {
-      title: "Chat HERBIE",
-      description: "Consulta tu manual clínico con IA",
+      title: t('card.chat_herbie'),
+      description: t('card.chat_desc'),
       icon: MessageCircle,
       color: "bg-primary/10 text-primary",
       action: () => navigate("/chat"),
     },
     {
-      title: "Registrar",
-      description: "Nuevo autorregistro rápido",
+      title: t('card.register'),
+      description: t('card.register_desc'),
       icon: PenLine,
       color: "bg-secondary/10 text-secondary",
       action: () => navigate(`/register/${planId}`),
     },
     {
-      title: "Estadísticas",
-      description: "Tu progreso semanal",
+      title: t('card.stats'),
+      description: t('card.stats_desc'),
       icon: BarChart3,
       color: "bg-accent/10 text-accent",
       action: () => navigate("/stats"),
     },
     {
-      title: "Análisis ABA",
-      description: "Analizar con Cerebro Experto",
+      title: t('card.aba_analysis'),
+      description: t('card.aba_desc'),
       icon: BrainCircuit,
       color: "bg-primary/10 text-primary",
       action: () => navigate("/aba"),
@@ -137,7 +141,7 @@ const Dashboard = () => {
             <h1 className="text-xl font-semibold text-foreground uppercase tracking-tight">{currentPlanTitle}</h1>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">Gestiona tus progresos y registros clínicos</p>
+        <p className="text-sm text-muted-foreground">{t('dash.subtitle')}</p>
       </motion.div>
 
       {/* Quick Stats Banner */}
@@ -147,11 +151,11 @@ const Dashboard = () => {
         transition={{ duration: 0.2, delay: 0.05 }}
         className="herbie-gradient rounded-xl p-4 text-primary-foreground"
       >
-        <p className="text-xs font-medium opacity-80">Resumen semanal</p>
+        <p className="text-xs font-medium opacity-80">{t('dash.weekly_summary')}</p>
         <div className="flex items-baseline gap-4 mt-1">
           <div>
             <span className="text-2xl font-bold">{logs?.length || 0}</span>
-            <span className="text-xs ml-1 opacity-80">registros</span>
+            <span className="text-xs ml-1 opacity-80">{t('dash.records')}</span>
           </div>
           <div>
             <span className="text-2xl font-bold">
@@ -159,14 +163,14 @@ const Dashboard = () => {
                 ? (logs.reduce((acc: number, log: any) => acc + (Number(log.data.intensity) || 0), 0) / logs.length).toFixed(1)
                 : 0}
             </span>
-            <span className="text-xs ml-1 opacity-80">intensidad media</span>
+            <span className="text-xs ml-1 opacity-80">{t('dash.avg_intensity')}</span>
           </div>
         </div>
         <button
           onClick={() => navigate("/stats")}
           className="flex items-center gap-1 mt-2 text-xs font-medium opacity-90 hover:opacity-100 transition-opacity"
         >
-          Ver detalles <ArrowRight className="w-3 h-3" />
+          {t('dash.view_details')} <ArrowRight className="w-3 h-3" />
         </button>
       </motion.div>
 
@@ -203,7 +207,7 @@ const Dashboard = () => {
         className="space-y-2"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">Últimos registros</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t('dash.recent_logs')}</h2>
           {isLoading && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
         </div>
         
@@ -211,14 +215,14 @@ const Dashboard = () => {
           {logs && logs.length > 0 ? (
             logs.map((log, i) => {
               const intensity = log.data.intensity || 5;
-              const emotion = log.data.emotion || "Registro";
+              const emotion = log.data.emotion || t('dash.emotion_label');
               const phase = log.data.phase || "intervencion";
-              const time = formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: es });
+              const time = formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: dateLocale });
               
               const phaseStyles: Record<string, { label: string, color: string }> = {
-                pre: { label: 'PRE', color: 'bg-blue-500/10 text-blue-600 border-blue-200' },
-                intervencion: { label: 'INT', color: 'bg-amber-500/10 text-amber-600 border-amber-200' },
-                post: { label: 'POST', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-200' },
+                pre: { label: t('dash.phase_pre'), color: 'bg-blue-500/10 text-blue-600 border-blue-200' },
+                intervencion: { label: t('dash.phase_int'), color: 'bg-amber-500/10 text-amber-600 border-amber-200' },
+                post: { label: t('dash.phase_post'), color: 'bg-emerald-500/10 text-emerald-600 border-emerald-200' },
               };
 
               const currentPhase = phaseStyles[phase] || phaseStyles.intervencion;
@@ -247,7 +251,7 @@ const Dashboard = () => {
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {log.data.event_date ? `Suceso: ${log.data.event_date}` : (log.data.conduct || "Sin conducta")} · {time}
+                        {log.data.event_date ? `${t('dash.event')}: ${log.data.event_date}` : (log.data.conduct || t('dash.conduct_none'))} · {time}
                       </p>
                     </div>
                   </div>
@@ -257,8 +261,8 @@ const Dashboard = () => {
             })
           ) : !isLoading ? (
             <div className="text-center py-8 border-2 border-dashed border-muted rounded-2xl">
-              <p className="text-xs text-muted-foreground">No hay registros todavía.</p>
-              <p className="text-[10px] text-muted-foreground mt-1">¡Prueba a mandarle un audio a Herbie!</p>
+              <p className="text-xs text-muted-foreground">{t('dash.no_logs')}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">{t('dash.try_audio')}</p>
             </div>
           ) : null}
         </div>
@@ -270,7 +274,7 @@ const Dashboard = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Brain className="w-5 h-5 text-primary" />
-              Detalle del Registro
+              {t('dash.detail_title')}
             </DialogTitle>
           </DialogHeader>
           
@@ -278,11 +282,11 @@ const Dashboard = () => {
             <div className="space-y-4 py-4">
               <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Emoción</p>
-                  <p className="text-xl font-bold capitalize">{selectedLog.data.emotion || "Registro"}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('dash.emotion_label')}</p>
+                  <p className="text-xl font-bold capitalize">{selectedLog.data.emotion || t('dash.emotion_label')}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Intensidad</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('dash.intensity_label')}</p>
                   <p className="text-3xl font-black text-primary">{selectedLog.data.intensity || 0}</p>
                 </div>
               </div>
@@ -304,12 +308,12 @@ const Dashboard = () => {
               <div className="pt-2 border-t border-muted">
                 <p className="text-[10px] text-muted-foreground text-center">
                   {selectedLog.data.recorded_at ? (
-                    `Mensaje enviado el ${new Date(selectedLog.data.recorded_at).toLocaleString('es-ES', { 
+                    `${t('dash.sent_at')} ${new Date(selectedLog.data.recorded_at).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US', { 
                       dateStyle: 'full', 
                       timeStyle: 'short' 
                     })}`
                   ) : (
-                    `Registrado el ${new Date(selectedLog.created_at).toLocaleString('es-ES', { 
+                    `${t('dash.recorded_at')} ${new Date(selectedLog.created_at).toLocaleString(lang === 'es' ? 'es-ES' : 'en-US', { 
                       dateStyle: 'full', 
                       timeStyle: 'short' 
                     })}`
@@ -329,23 +333,23 @@ const Dashboard = () => {
                       ) : (
                         <Trash2 className="w-4 h-4" />
                       )}
-                      Eliminar registro
+                      {t('dash.delete_btn')}
                     </button>
                   </AlertDialogTrigger>
                   <AlertDialogContent className="rounded-2xl max-w-[90vw] sm:max-w-md">
                     <AlertDialogHeader>
-                      <AlertDialogTitle>¿Eliminar este registro?</AlertDialogTitle>
+                      <AlertDialogTitle>{t('dash.delete_confirm_title')}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Esta acción no se puede deshacer. Se borrará permanentemente de tu diario clínico.
+                        {t('dash.delete_confirm_desc')}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex flex-row gap-2 sm:gap-0">
-                      <AlertDialogCancel className="flex-1 rounded-xl">Cancelar</AlertDialogCancel>
+                      <AlertDialogCancel className="flex-1 rounded-xl">{t('dash.cancel')}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => deleteMutation.mutate(selectedLog.id)}
                         className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl"
                       >
-                        Eliminar
+                        {t('dash.confirm_delete')}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
