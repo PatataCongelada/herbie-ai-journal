@@ -120,7 +120,7 @@ const ABAPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-dvh bg-background">
       <div className="flex items-center gap-3 p-4 border-b bg-card/50 backdrop-blur-md sticky top-0 z-20">
         <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors p-1 hover:bg-muted rounded-lg">
           <ArrowLeft className="w-5 h-5" />
@@ -245,56 +245,62 @@ const ABAPage = () => {
         </AnimatePresence>
       </div>
 
-      {/* ABC Model Hint (Floating) */}
-      <div className="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar border-t bg-background/50 backdrop-blur-sm">
-        {[
-          { icon: Target, label: "Situación/A", color: "text-blue-500 bg-blue-500/10" },
-          { icon: Zap, label: "Conducta/B", color: "text-amber-500 bg-amber-500/10" },
-          { icon: Microscope, label: "Consecuente/C", color: "text-emerald-500 bg-emerald-500/10" },
-        ].map((hint, i) => (
-          <button 
-            key={i} 
-            onClick={() => setInput(prev => prev + (prev ? " " : "") + hint.label + ": ")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-[10px] font-bold border border-transparent hover:border-current transition-all ${hint.color}`}
-          >
-            <hint.icon className="w-3 h-3" />
-            {hint.label}
-          </button>
-        ))}
-      </div>
+      {/* ABC Hint + Input: sticky bottom container */}
+      <div className="sticky bottom-0 z-10 bg-background border-t">
+        {/* ABC Model Hint */}
+        <div className="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar bg-background/50 backdrop-blur-sm">
+          {[
+            { icon: Target, label: "Situación/A", color: "text-blue-500 bg-blue-500/10" },
+            { icon: Zap, label: "Conducta/B", color: "text-amber-500 bg-amber-500/10" },
+            { icon: Microscope, label: "Consecuente/C", color: "text-emerald-500 bg-emerald-500/10" },
+          ].map((hint, i) => (
+            <button
+              key={i}
+              onClick={() => setInput(prev => prev + (prev ? " " : "") + hint.label + ": ")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap text-[10px] font-bold border border-transparent hover:border-current transition-all ${hint.color}`}
+            >
+              <hint.icon className="w-3 h-3" />
+              {hint.label}
+            </button>
+          ))}
+        </div>
 
-      {/* Input Area */}
-      <div className="p-4 bg-background border-t pb-24 lg:pb-8">
-        <div className="relative group max-w-lg mx-auto">
-          {(() => { const isBlocked = isTyping || messages.some(m => m.isStreaming); return (
-          <>
-
-          <textarea
-            value={input}
-            onChange={(e) => !isBlocked && setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && !isBlocked) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            disabled={isBlocked}
-            placeholder={isBlocked ? "Herbie está escribiendo... Para enviar un mensaje, detén primero a Herbie." : "Describe un caso para analizar..."}
-            className={`w-full rounded-2xl px-5 py-4 text-sm focus:outline-none transition-all resize-none pr-14 border ${
-              isBlocked
-                ? "bg-muted/30 border-border/30 text-muted-foreground cursor-not-allowed opacity-60"
-                : "bg-muted/50 hover:bg-muted border-border/50 focus:ring-2 focus:ring-primary/20"
-            }`}
-            rows={2}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || isBlocked}
-            className="absolute right-3 bottom-3 p-2.5 bg-primary text-primary-foreground rounded-xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-          </> ); })()}
+        {/* Input Area */}
+        <div className="p-4 pb-24 lg:pb-6">
+          <div className="relative group max-w-lg mx-auto">
+            {(() => {
+              const isBlocked = isTyping || messages.some(m => m.isStreaming);
+              return (
+                <>
+                  <textarea
+                    value={input}
+                    onChange={(e) => !isBlocked && setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey && !isBlocked) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    disabled={isBlocked}
+                    placeholder={isBlocked ? "Herbie está escribiendo... detén primero a Herbie para responder." : "Describe un caso para analizar..."}
+                    className={`w-full rounded-2xl px-5 py-4 text-sm focus:outline-none transition-all resize-none pr-14 border ${
+                      isBlocked
+                        ? "bg-muted/30 border-border/30 text-muted-foreground cursor-not-allowed opacity-60"
+                        : "bg-muted/50 hover:bg-muted border-border/50 focus:ring-2 focus:ring-primary/20"
+                    }`}
+                    rows={2}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!input.trim() || isBlocked}
+                    className="absolute right-3 bottom-3 p-2.5 bg-primary text-primary-foreground rounded-xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </>
+              );
+            })()}
+          </div>
         </div>
       </div>
     </div>
