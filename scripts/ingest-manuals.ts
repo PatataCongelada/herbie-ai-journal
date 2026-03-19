@@ -159,6 +159,9 @@ async function ingest() {
             
             if (retryCount >= maxRetries) {
               console.error(`\n❌ Se agotaron los reintentos para el fragmento ${i} de ${fileName}.`);
+              if (is429) {
+                throw new Error(`QUOTA_EXCEEDED: Límite diario alcanzado en ${fileName} @ ${i}`);
+              }
               throw new Error(`PERMANENT_CHUNK_ERROR: ${fileName} @ ${i}`);
             }
           }
@@ -182,7 +185,11 @@ async function runWithRestart() {
     try {
       await ingest();
       break; // Éxito total
-    } catch (err) {
+    } catch (err: any) {
+      if (err.message && err.message.includes('QUOTA_EXCEEDED')) {
+        console.log('\n🛑 Límite de cuota diaria detectado. Deteniendo ejecución. El Cron Job de GitHub Actions la retomará mañana automáticamente.');
+        process.exit(0);
+      }
       restarts++;
       const waitTime = 30000; // Esperar 30 segundos antes de reiniciar el proceso completo
       console.log(`\n🔄 Reinicio global detectado (${restarts}/${MAX_GLOBAL_RESTARTS}). Reintentando en ${waitTime/1000}s...`);
