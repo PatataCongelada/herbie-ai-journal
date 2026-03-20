@@ -184,6 +184,14 @@ export const translations = {
     // 404
     '404.title': '¡Oops! Página no encontrada',
     '404.return_home': 'Volver al inicio',
+
+    // Login
+    'login.title': 'Bienvenido a Herbie',
+    'login.subtitle': 'Tu asistente clínico inteligente',
+    'login.username': 'Usuario',
+    'login.password': 'Contraseña',
+    'login.btn': 'Entrar',
+    'login.error': 'Credenciales incorrectas',
   },
   en: {
     // Navigation
@@ -368,5 +376,13 @@ export const translations = {
     // 404
     '404.title': 'Oops! Page not found',
     '404.return_home': 'Return to Home',
+
+    // Login
+    'login.title': 'Welcome to Herbie',
+    'login.subtitle': 'Your intelligent clinical assistant',
+    'login.username': 'Username',
+    'login.password': 'Password',
+    'login.btn': 'Sign In',
+    'login.error': 'Invalid credentials',
   }
 };

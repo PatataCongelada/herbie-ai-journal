@@ -2,10 +2,12 @@ import { ArrowLeft, BookOpen, Upload, LogOut, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { logout } = useAuth();
 
   return (
     <div className="px-4 pt-4 space-y-6">
@@ -70,8 +72,14 @@ const SettingsPage = () => {
         className="herbie-card p-4 space-y-3"
       >
         <h3 className="text-sm font-semibold text-foreground">{t('settings.account')}</h3>
-        <p className="text-xs text-muted-foreground">usuario@ejemplo.com</p>
-        <button className="w-full border border-border text-foreground rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-muted transition-colors">
+        <p className="text-xs text-muted-foreground">admin@herbie.ai</p>
+        <button 
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
+          className="w-full border border-border text-foreground rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-muted transition-colors"
+        >
           <LogOut className="w-4 h-4" />
           {t('settings.logout')}
         </button>
