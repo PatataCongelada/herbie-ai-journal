@@ -53,8 +53,13 @@ export const translations = {
     'plan.rumia': 'Rumia',
     'plan.meditacion': 'Meditación',
     'plan.covert': 'Condicionamiento Encubierto',
-    'covert.generate_basic': 'Generar Plan Básico',
-    'covert.generate_prompt': 'Actúa como un supervisor clínico experto. Basándote en el manual de Cautela, genera un borrador de plan de intervención básico para un caso general. El plan debe incluir: 1. Objetivos terapéuticos, 2. Técnica de condicionamiento encubierto recomendada, 3. Estímulos (reforzadores o aversivos) sugeridos para las imágenes mentales, y 4. Procedimiento paso a paso para la aplicación clínica. Sé técnicamente riguroso pero claro.',
+    'covert.generate_basic': 'Generar Plan con IA',
+    'covert.generate_prompt': 'Actúa como un supervisor clínico experto. Basándote ÚNICAMENTE en el manual de Cautela, genera un borrador de plan de intervención. RESPONDE EXCLUSIVAMENTE EN FORMATO JSON con estas claves: "title", "objectives", "technique", "stimuli", "procedure". Evita cualquier texto fuera del JSON.',
+    'covert.field_title': 'Título del Plan',
+    'covert.field_objectives': 'Objetivos Terapéuticos',
+    'covert.field_technique': 'Técnica Recomendada',
+    'covert.field_stimuli': 'Estímulos Imaginarios',
+    'covert.field_procedure': 'Procedimiento Paso a Paso',
 
     // Dashboard Extras
     'dash.delete_success': 'Registro eliminado correctamente',
@@ -252,8 +257,13 @@ export const translations = {
     'plan.rumia': 'Rumination',
     'plan.meditacion': 'Meditation',
     'plan.covert': 'Covert Conditioning',
-    'covert.generate_basic': 'Generate Basic Plan',
-    'covert.generate_prompt': 'Act as an expert clinical supervisor. Based on the Cautela manual, generate a basic intervention plan draft for a general case. The plan must include: 1. Therapeutic objectives, 2. Recommended covert conditioning technique, 3. Suggested stimuli (reinforcers or aversives) for mental imagery, and 4. Step-by-step procedure for clinical application. Be technically rigorous but clear.',
+    'covert.generate_basic': 'Generate Plan with AI',
+    'covert.generate_prompt': 'Act as an expert clinical supervisor. Based ONLY on the Cautela manual, generate an intervention plan draft. RESPOND EXCLUSIVELY IN JSON FORMAT with these keys: "title", "objectives", "technique", "stimuli", "procedure". Avoid any text outside the JSON.',
+    'covert.field_title': 'Plan Title',
+    'covert.field_objectives': 'Therapeutic Objectives',
+    'covert.field_technique': 'Recommended Technique',
+    'covert.field_stimuli': 'Imaginary Stimuli',
+    'covert.field_procedure': 'Step-by-Step Procedure',
 
     // Dashboard Extras
     'dash.delete_success': 'Record deleted successfully',

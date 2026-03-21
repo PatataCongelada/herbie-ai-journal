@@ -1,41 +1,33 @@
-import { useState, useRef, useEffect } from "react";
-import { Brain, Send, Loader2, ArrowLeft, EyeOff, Sparkles, MessageCircle, HelpCircle, Target, Zap } from "lucide-react";
+import { useState } from "react";
+import { Brain, ArrowLeft, EyeOff, Sparkles, Loader2, Save, Wand2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
+import { toast } from "sonner";
 
 const CovertPage = () => {
   const navigate = useNavigate();
-  const { lang, t } = useLanguage();
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<any[]>([]);
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [planData, setPlanData] = useState({
+    title: "",
+    objectives: "",
+    technique: "",
+    stimuli: "",
+    procedure: ""
+  });
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const handleSend = async (overrideInput?: string) => {
-    const textToSend = overrideInput || input;
-    if (!textToSend.trim() || isLoading) return;
-
-    const userMessage = { role: "user", content: textToSend };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+  const handleGenerate = async () => {
     setIsLoading(true);
-
     try {
       const response = await fetch("/api/clinical-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          messages: [...messages, userMessage],
+          messages: [{ role: "user", content: t('covert.generate_prompt') }],
           category: "all",
-          expert: "Cautela", // Joseph Cautela reference
-          source: "Covert_Conditioning_Handbook.pdf" // Filter strictly for this manual
+          expert: "Cautela",
+          source: "Covert_Conditioning_Handbook.pdf"
         }),
       });
 
@@ -45,26 +37,36 @@ const CovertPage = () => {
         throw new Error(data.text || "Error en la respuesta");
       }
 
-      setMessages((prev) => [...prev, { role: "assistant", content: data.text }]);
+      // Limpiar y parsear JSON de la respuesta de la IA
+      const jsonStr = data.text.replace(/```json/g, "").replace(/```/g, "").trim();
+      const parsed = JSON.parse(jsonStr);
+      
+      setPlanData({
+        title: parsed.title || "",
+        objectives: parsed.objectives || "",
+        technique: parsed.technique || "",
+        stimuli: parsed.stimuli || "",
+        procedure: parsed.procedure || ""
+      });
+      
+      toast.success(t('reg.extract_success') || "Plan generado con éxito");
     } catch (error: any) {
-      console.error("Error:", error);
-      setMessages((prev) => [...prev, { role: "assistant", content: error.message || t('aba.error_response') || "Lo siento, hubo un error." }]);
+      console.error("Error generating plan:", error);
+      toast.error(t('reg.extract_error') || "No se pudo generar el plan automático");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const suggestions = [
-    { icon: Zap, label: lang === 'es' ? "Sensibilización Encubierta" : "Covert Sensitization" },
-    { icon: Target, label: lang === 'es' ? "Reforzamiento Encubierto" : "Covert Reinforcement" },
-    { icon: EyeOff, label: lang === 'es' ? "Coste de Respuesta" : "Covert Response Cost" },
-    { icon: MessageCircle, label: lang === 'es' ? "¿Qué es la Cautela?" : "What is Covert Process?" }
-  ];
+  const handleSave = () => {
+    toast.success(t('reg.save_success'));
+    // En un futuro esto se guardaría en Supabase
+  };
 
   return (
     <div className="flex flex-col h-dvh bg-background">
       {/* Header */}
-      <div className="p-4 border-b border-border bg-card/50 backdrop-blur-xl flex items-center justify-between">
+      <div className="p-4 border-b border-border bg-card/50 backdrop-blur-xl flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-xl transition-colors">
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
@@ -78,113 +80,125 @@ const CovertPage = () => {
                 {t('plan.covert')}
               </h1>
               <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-tighter opacity-70">
-                {lang === 'es' ? "Manual de Joseph Cautela" : "Joseph Cautela's Manual"}
+                Editor Clínico V1.0
               </p>
             </div>
           </div>
         </div>
+        <button 
+          onClick={handleSave}
+          className="p-2.5 bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-colors"
+        >
+          <Save className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Chat Area */}
-      <div 
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"
-      >
-        <AnimatePresence initial={false}>
-          {messages.length === 0 ? (
+      {/* Editor Area */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar pb-32">
+        <AnimatePresence>
+          {isLoading && (
             <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="h-full flex flex-col items-center justify-center text-center space-y-6 px-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-background/60 backdrop-blur-sm flex items-center justify-center"
             >
-              <div className="w-20 h-20 rounded-[2rem] bg-indigo-500/5 flex items-center justify-center relative">
-                <Brain className="w-10 h-10 text-indigo-500 opacity-20" />
-                <Sparkles className="w-6 h-6 text-indigo-500 absolute -top-1 -right-1 animate-pulse" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-foreground">
-                  {lang === 'es' ? "¿Qué técnica practicamos hoy?" : "Which technique do we practice today?"}
-                </h3>
-                <p className="text-xs text-muted-foreground max-w-[240px] leading-relaxed">
-                  {lang === 'es' 
-                    ? "Consulta el manual avanzado de condicionamiento encubierto para tus intervenciones imaginarias." 
-                    : "Consult the advanced covert conditioning manual for your imaginary interventions."}
-                </p>
-              </div>
-              
-              <div className="space-y-3 w-full max-w-sm">
-                <button 
-                  onClick={() => handleSend(t('covert.generate_prompt'))}
-                  className="w-full p-4 herbie-gradient text-white rounded-2xl text-xs font-black shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 mb-2"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  {t('covert.generate_basic')}
-                </button>
-                
-                <div className="grid grid-cols-2 gap-2 w-full">
-                  {suggestions.map((item, i) => (
-                    <button 
-                      key={i}
-                      onClick={() => handleSend(item.label)}
-                      className="p-3 bg-card border border-border/50 rounded-2xl text-[10px] font-bold text-muted-foreground hover:bg-indigo-500/5 hover:text-indigo-600 transition-all flex items-center gap-2"
-                    >
-                      <item.icon className="w-3 h-3" />
-                      {item.label}
-                    </button>
-                  ))}
+              <div className="bg-card p-8 rounded-[2.5rem] shadow-2xl border border-border flex flex-col items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl herbie-gradient flex items-center justify-center animate-bounce">
+                  <Brain className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-foreground">Herbie está analizando Cautela...</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1 italic">Redactando plan clínico</p>
                 </div>
               </div>
             </motion.div>
-          ) : (
-            messages.map((msg, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[85%] p-4 rounded-3xl text-sm leading-relaxed shadow-sm ${
-                    msg.role === "user"
-                      ? "bg-indigo-600 text-white rounded-tr-none shadow-indigo-200"
-                      : "bg-card border border-border/50 text-card-foreground rounded-tl-none"
-                  }`}
-                >
-                  {msg.content}
-                </div>
-              </motion.div>
-            ))
           )}
         </AnimatePresence>
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-card border border-border/50 p-4 rounded-3xl rounded-tl-none flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
-              <span className="text-xs text-muted-foreground font-medium">{t('aba.thinking')}</span>
+
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Title Field */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-primary px-1">
+              {t('covert.field_title')}
+            </label>
+            <input 
+              type="text"
+              value={planData.title}
+              onChange={(e) => setPlanData({...planData, title: e.target.value})}
+              placeholder="Ej: Plan de Sensibilización para Tabaquismo"
+              className="w-full bg-card border border-border/50 rounded-2xl px-4 h-14 text-lg font-bold focus:ring-2 ring-indigo-500/20 outline-none transition-all shadow-sm"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Objectives */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500 px-1">
+                {t('covert.field_objectives')}
+              </label>
+              <textarea 
+                value={planData.objectives}
+                onChange={(e) => setPlanData({...planData, objectives: e.target.value})}
+                placeholder="Describe los objetivos de la intervención..."
+                className="w-full bg-card border border-border/50 rounded-2xl p-4 min-h-[120px] text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all shadow-sm resize-none"
+              />
+            </div>
+
+            {/* Technique */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500 px-1">
+                {t('covert.field_technique')}
+              </label>
+              <textarea 
+                value={planData.technique}
+                onChange={(e) => setPlanData({...planData, technique: e.target.value})}
+                placeholder="Técnica sugerida por el manual de Cautela..."
+                className="w-full bg-card border border-border/50 rounded-2xl p-4 min-h-[120px] text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all shadow-sm resize-none"
+              />
             </div>
           </div>
-        )}
+
+          {/* Stimuli */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500 px-1 flex items-center gap-2">
+              <Sparkles className="w-3 h-3" />
+              {t('covert.field_stimuli')}
+            </label>
+            <textarea 
+              value={planData.stimuli}
+              onChange={(e) => setPlanData({...planData, stimuli: e.target.value})}
+              placeholder="Identifica los estímulos aversivos o reforzadores imaginarios..."
+              className="w-full bg-card border border-border/50 rounded-2xl p-4 min-h-[120px] text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all shadow-sm resize-none"
+            />
+          </div>
+
+          {/* Procedure */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500 px-1 flex items-center gap-2">
+              <Target className="w-3 h-3" />
+              {t('covert.field_procedure')}
+            </label>
+            <textarea 
+              value={planData.procedure}
+              onChange={(e) => setPlanData({...planData, procedure: e.target.value})}
+              placeholder="Guía paso a paso de la sesión imaginaria..."
+              className="w-full bg-card border border-border/50 rounded-2xl p-4 min-h-[200px] text-sm focus:ring-2 ring-indigo-500/20 outline-none transition-all shadow-sm resize-none"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 bg-background border-t border-border">
-        <div className="max-w-2xl mx-auto flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder={t('aba.chat_placeholder')}
-            className="flex-1 bg-muted/50 border-none rounded-2xl px-4 text-sm focus:ring-2 ring-indigo-500/20 outline-none h-12"
-          />
-          <button
-            onClick={() => handleSend()}
-            disabled={!input.trim() || isLoading}
-            className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 disabled:opacity-50 active:scale-95 transition-all"
-          >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-          </button>
-        </div>
+      {/* Floating Action Button */}
+      <div className="fixed bottom-8 left-0 right-0 px-6 max-w-2xl mx-auto flex justify-center pointer-events-none">
+        <button
+          onClick={handleGenerate}
+          disabled={isLoading}
+          className="pointer-events-auto herbie-gradient text-white h-16 px-8 rounded-[2rem] shadow-2xl shadow-primary/40 flex items-center justify-center gap-3 active:scale-95 transition-all text-sm font-black uppercase tracking-widest group"
+        >
+          <Wand2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+          {t('covert.generate_basic')}
+        </button>
       </div>
     </div>
   );
