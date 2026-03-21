@@ -60,10 +60,11 @@ async function checkProgress() {
     }
 
     // Calc uploaded chunks
+    const posixPath = relativePath.split(path.sep).join('/');
     const { count } = await supabase
       .from('manual_knowledge')
       .select('id', { count: 'exact', head: true })
-      .filter('metadata->>full_path', 'eq', relativePath);
+      .filter('metadata->>full_path', 'eq', posixPath);
 
     const uploaded = count || 0;
     totalChunksRequired += required;

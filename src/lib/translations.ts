@@ -86,6 +86,9 @@ export const translations = {
     'plan.aprendizaje_desc': 'Aprende conceptos complejos de forma secuencial y sin frustración.',
     'plan.aba_expert': 'Cerebro Experto ABA',
     'plan.aba_expert_desc': 'Análisis funcional de conducta avanzado. Descubre por qué haces lo que haces.',
+    'plan.social_skills': 'Habilidades Sociales',
+    'plan.social_skills_desc': 'Entrenamiento en habilidades comunicativas y de relación interpersonal. Próximamente.',
+    'plan.coming_soon': 'Próximamente',
 
     // ABA Page
     'aba.title': 'Cerebro Experto ABA',
@@ -278,6 +281,9 @@ export const translations = {
     'plan.aprendizaje_desc': 'Learn complex concepts sequentially and without frustration.',
     'plan.aba_expert': 'ABA Expert Brain',
     'plan.aba_expert_desc': 'Advanced functional behavior analysis. Discover why you do what you do.',
+    'plan.social_skills': 'Social Skills',
+    'plan.social_skills_desc': 'Training in communication and interpersonal relationship skills. Coming soon.',
+    'plan.coming_soon': 'Coming Soon',
 
     // ABA Page
     'aba.title': 'ABA Expert Brain',

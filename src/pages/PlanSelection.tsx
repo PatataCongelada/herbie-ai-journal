@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap } from "lucide-react";
+import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users } from "lucide-react";
+
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -80,9 +81,19 @@ const PlanSelection = () => {
       lightColor: "bg-violet-500/10 text-violet-600",
       isBeta: true
     },
+    {
+      id: "habilidades-sociales",
+      title: t('plan.social_skills'),
+      description: t('plan.social_skills_desc'),
+      icon: Users,
+      color: "from-rose-400 to-pink-500",
+      lightColor: "bg-rose-500/10 text-rose-500",
+      comingSoon: true,
+    },
   ];
 
   const handleNavigate = (plan: any) => {
+    if (plan.comingSoon) return;
     if (plan.path) {
       navigate(plan.path);
     } else {
@@ -122,7 +133,8 @@ const PlanSelection = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
                 onClick={() => handleNavigate(plan)}
-                className="w-full relative group"
+                disabled={!!plan.comingSoon}
+                className={`w-full relative group ${plan.comingSoon ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <div className="herbie-card p-5 flex items-center gap-5 text-left border-transparent group-hover:border-primary/20 transition-all duration-300 active:scale-[0.98]">
                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${plan.lightColor}`}>
@@ -135,6 +147,9 @@ const PlanSelection = () => {
                       </h3>
                       {plan.isBeta && (
                         <span className="text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Beta</span>
+                      )}
+                      {plan.comingSoon && (
+                        <span className="text-[10px] font-bold bg-muted text-muted-foreground px-2 py-0.5 rounded-full uppercase tracking-tighter">{t('plan.coming_soon')}</span>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
