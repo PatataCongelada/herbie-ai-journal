@@ -16,6 +16,7 @@ import LearningMode from "./pages/LearningMode";
 import LoginPage from "./pages/LoginPage";
 import CovertPage from "./pages/CovertPage";
 import CaseExpertPage from "./pages/CaseExpertPage";
+import AlexithymiaPage from "./pages/AlexithymiaPage";
 import NotFound from "./pages/NotFound";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 

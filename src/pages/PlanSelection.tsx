@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users, EyeOff } from "lucide-react";
+import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users, EyeOff, Heart } from "lucide-react";
 
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -118,6 +118,16 @@ const PlanSelection = () => {
       icon: Brain,
       color: "from-blue-600 to-indigo-700",
       lightColor: "bg-indigo-500/10 text-indigo-700",
+      isBeta: true
+    },
+    {
+      id: "alexithymia",
+      title: t('plan.alexithymia'),
+      description: t('plan.alexithymia_desc'),
+      path: "/alexithymia",
+      icon: Heart,
+      color: "from-rose-500 to-pink-600",
+      lightColor: "bg-rose-500/10 text-rose-600",
       isBeta: true
     },
   ];
