@@ -110,6 +110,16 @@ const PlanSelection = () => {
       lightColor: "bg-primary/10 text-primary",
       isBeta: true
     },
+    {
+      id: "case-expert",
+      title: t('plan.case_expert'),
+      description: t('plan.case_expert_desc'),
+      path: "/case-expert",
+      icon: Brain,
+      color: "from-blue-600 to-indigo-700",
+      lightColor: "bg-indigo-500/10 text-indigo-700",
+      isBeta: true
+    },
   ];
 
   const handleNavigate = (plan: any) => {

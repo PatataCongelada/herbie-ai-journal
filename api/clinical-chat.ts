@@ -33,10 +33,14 @@ async function getClinicalContext(query: string, category: string, expert: strin
 
     if (error || !matches || matches.length === 0) return "";
 
-    // Filtrar por fuente si se especifica
-    const filteredMatches = source 
-      ? matches.filter((m: any) => m.metadata?.source === source || m.metadata?.full_path?.includes(source))
-      : matches;
+    // Filtrar por fuente si se especifica (soporta string o array de strings)
+    let filteredMatches = matches;
+    if (source) {
+      const sources = Array.isArray(source) ? source : [source];
+      filteredMatches = matches.filter((m: any) => 
+        sources.some(s => m.metadata?.source === s || m.metadata?.full_path?.includes(s))
+      );
+    }
 
     if (filteredMatches.length === 0) return "";
 

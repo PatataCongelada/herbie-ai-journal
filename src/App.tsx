@@ -15,6 +15,7 @@ import ABAPage from "./pages/ABAPage";
 import LearningMode from "./pages/LearningMode";
 import LoginPage from "./pages/LoginPage";
 import CovertPage from "./pages/CovertPage";
+import CaseExpertPage from "./pages/CaseExpertPage";
 import NotFound from "./pages/NotFound";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 
@@ -75,6 +76,7 @@ const App = () => (
                 <Route path="/aba" element={<ABAPage />} />
                 <Route path="/learning" element={<LearningMode />} />
                 <Route path="/covert" element={<CovertPage />} />
+                <Route path="/case-expert" element={<CaseExpertPage />} />
               </Route>
               
               <Route path="/chat" element={
