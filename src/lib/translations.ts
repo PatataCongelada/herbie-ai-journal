@@ -88,6 +88,8 @@ export const translations = {
     // Plan Selection
     'plans.welcome': 'Hola de nuevo',
     'plans.subtitle': '¿En qué plan clínico vamos a trabajar hoy?',
+    'plans.section_brains': 'Cerebros Expertos',
+    'plans.section_tools': 'Pack de Herramientas',
     'plans.heroic_data': 'Dato HERBIE',
     'plan.activacion_desc': 'Recupera tu vitalidad a través de rutinas y actividades gratificantes.',
     'plan.rumia_desc': 'Gestiona esos pensamientos circulares que no te dejan avanzar.',
@@ -296,6 +298,8 @@ export const translations = {
     // Plan Selection
     'plans.welcome': 'Welcome back',
     'plans.subtitle': 'Which clinical plan are we working on today?',
+    'plans.section_brains': 'Expert Brains',
+    'plans.section_tools': 'Clinical Tool Pack',
     'plans.heroic_data': 'HERBIE Fact',
     'plan.activacion_desc': 'Regain your vitality through routines and rewarding activities.',
     'plan.rumia_desc': 'Manage those circular thoughts that keep from moving forward.',
