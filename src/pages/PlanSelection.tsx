@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users } from "lucide-react";
+import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users, EyeOff } from "lucide-react";
 
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -79,6 +79,16 @@ const PlanSelection = () => {
       icon: GraduationCap,
       color: "from-violet-400 to-purple-500",
       lightColor: "bg-violet-500/10 text-violet-600",
+      isBeta: true
+    },
+    {
+      id: "covert",
+      title: t('plan.covert'),
+      description: t('plan.covert_desc'),
+      path: "/covert",
+      icon: EyeOff,
+      color: "from-indigo-500 to-purple-600",
+      lightColor: "bg-indigo-500/10 text-indigo-600",
       isBeta: true
     },
     {

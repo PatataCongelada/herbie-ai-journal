@@ -52,6 +52,9 @@ export const translations = {
     'plan.activacion': 'Activación Conductual',
     'plan.rumia': 'Rumia',
     'plan.meditacion': 'Meditación',
+    'plan.covert': 'Condicionamiento Encubierto',
+    'covert.generate_basic': 'Generar Plan Básico',
+    'covert.generate_prompt': 'Actúa como un supervisor clínico experto. Basándote en el manual de Cautela, genera un borrador de plan de intervención básico para un caso general. El plan debe incluir: 1. Objetivos terapéuticos, 2. Técnica de condicionamiento encubierto recomendada, 3. Estímulos (reforzadores o aversivos) sugeridos para las imágenes mentales, y 4. Procedimiento paso a paso para la aplicación clínica. Sé técnicamente riguroso pero claro.',
 
     // Dashboard Extras
     'dash.delete_success': 'Registro eliminado correctamente',
@@ -82,6 +85,7 @@ export const translations = {
     'plan.activacion_desc': 'Recupera tu vitalidad a través de rutinas y actividades gratificantes.',
     'plan.rumia_desc': 'Gestiona esos pensamientos circulares que no te dejan avanzar.',
     'plan.meditacion_desc': 'Encuentra la calma y observa tus estados fisiológicos con atención plena.',
+    'plan.covert_desc': 'Entrenamiento en procesos internos: sensibilización y reforzamiento imaginario.',
     'plan.aprendizaje': 'Aprendizaje Sin Errores',
     'plan.aprendizaje_desc': 'Aprende conceptos complejos de forma secuencial y sin frustración.',
     'plan.aba_expert': 'Cerebro Experto ABA',
@@ -247,6 +251,9 @@ export const translations = {
     'plan.activacion': 'Behavioral Activation',
     'plan.rumia': 'Rumination',
     'plan.meditacion': 'Meditation',
+    'plan.covert': 'Covert Conditioning',
+    'covert.generate_basic': 'Generate Basic Plan',
+    'covert.generate_prompt': 'Act as an expert clinical supervisor. Based on the Cautela manual, generate a basic intervention plan draft for a general case. The plan must include: 1. Therapeutic objectives, 2. Recommended covert conditioning technique, 3. Suggested stimuli (reinforcers or aversives) for mental imagery, and 4. Step-by-step procedure for clinical application. Be technically rigorous but clear.',
 
     // Dashboard Extras
     'dash.delete_success': 'Record deleted successfully',
@@ -277,6 +284,7 @@ export const translations = {
     'plan.activacion_desc': 'Regain your vitality through routines and rewarding activities.',
     'plan.rumia_desc': 'Manage those circular thoughts that keep from moving forward.',
     'plan.meditacion_desc': 'Find calm and observe your physiological states with mindfulness.',
+    'plan.covert_desc': 'Training in internal processes: sensitization and imaginary reinforcement.',
     'plan.aprendizaje': 'Errorless Learning',
     'plan.aprendizaje_desc': 'Learn complex concepts sequentially and without frustration.',
     'plan.aba_expert': 'ABA Expert Brain',

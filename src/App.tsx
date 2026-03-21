@@ -14,6 +14,7 @@ import HomePage from "./pages/HomePage";
 import ABAPage from "./pages/ABAPage";
 import LearningMode from "./pages/LearningMode";
 import LoginPage from "./pages/LoginPage";
+import CovertPage from "./pages/CovertPage";
 import NotFound from "./pages/NotFound";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 
@@ -73,6 +74,7 @@ const App = () => (
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/aba" element={<ABAPage />} />
                 <Route path="/learning" element={<LearningMode />} />
+                <Route path="/covert" element={<CovertPage />} />
               </Route>
               
               <Route path="/chat" element={

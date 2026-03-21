@@ -69,11 +69,13 @@ async function ingest() {
     }
 
     try {
+      const posixPath = relativePath.split(path.sep).join('/');
+      
       // Check how many chunks are already processed
       const { count: existingCount } = await supabase
         .from('manual_knowledge')
         .select('id', { count: 'exact', head: true })
-        .filter('metadata->>full_path', 'eq', relativePath);
+        .filter('metadata->>full_path', 'eq', posixPath);
 
       const dataBuffer = fs.readFileSync(filePath);
       const data = await pdf(dataBuffer);
@@ -94,7 +96,7 @@ async function ingest() {
       console.log(`\n📄 Procesando: ${fileName} [Expert: ${expert}, Category: ${category}]...`);
       console.log(`🧩 Fragmentos totales: ${chunks.length} (En DB: ${existingCount || 0}).`);
 
-      const BATCH_SIZE = 100;
+      const BATCH_SIZE = 20;
       for (let i = (existingCount || 0); i < chunks.length; i += BATCH_SIZE) {
         const batchChunks = chunks.slice(i, i + BATCH_SIZE);
         const validBatch = batchChunks.filter(c => c.length >= 20);
@@ -127,7 +129,7 @@ async function ingest() {
               expert: expert,
               metadata: {
                 source: fileName,
-                full_path: relativePath.split(path.sep).join('/'),
+                full_path: posixPath,
                 chunk_index: i + index,
                 total_chunks: chunks.length
               }
@@ -142,8 +144,8 @@ async function ingest() {
             console.log(`✅ Lote completado.`);
             
             success = true;
-            // En lote de 100, 1 petición por minuto es MUY seguro para el límite de 15 peticiones/min
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Un respiro de 5s para ser muy conservadores con los límites TPM/RPM gratuitos
+            await new Promise(resolve => setTimeout(resolve, 5000));
           } catch (err: any) {
             retryCount++;
             const errorMessage = err.message?.toLowerCase() || "";

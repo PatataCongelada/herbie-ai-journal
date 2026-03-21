@@ -18,7 +18,7 @@ const model = genAI.getGenerativeModel({
 });
 const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
 
-async function getClinicalContext(query: string, category: string, expert: string): Promise<string> {
+async function getClinicalContext(query: string, category: string, expert: string, source?: string): Promise<string> {
   try {
     const result = await embeddingModel.embedContent(query);
     const embedding = result.embedding.values;
@@ -26,15 +26,22 @@ async function getClinicalContext(query: string, category: string, expert: strin
     const { data: matches, error } = await supabase.rpc('match_manual_knowledge', {
       query_embedding: embedding,
       match_threshold: 0.5,
-      match_count: 5, // Más contexto para el chat web
+      match_count: 10, // Aumentamos para tener margen de filtrado
       p_category: category === 'all' ? null : category,
       p_expert: expert === 'all' ? null : expert
     });
 
     if (error || !matches || matches.length === 0) return "";
 
+    // Filtrar por fuente si se especifica
+    const filteredMatches = source 
+      ? matches.filter((m: any) => m.metadata?.source === source || m.metadata?.full_path?.includes(source))
+      : matches;
+
+    if (filteredMatches.length === 0) return "";
+
     return "\n\nINFORMACIÓN TÉCNICA DE LOS MANUALES:\n" + 
-      matches.map((m: any) => `- ${m.content}`).join("\n");
+      filteredMatches.slice(0, 5).map((m: any) => `- ${m.content}`).join("\n");
   } catch (err) {
     console.error("Error en búsqueda semántica:", err);
     return "";
@@ -44,12 +51,12 @@ async function getClinicalContext(query: string, category: string, expert: strin
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { messages, category = 'general', expert = 'general' } = req.body;
+  const { messages, category = 'general', expert = 'general', source } = req.body;
   const lastMessage = messages[messages.length - 1].content;
 
   try {
     // 1. Obtener contexto clínico filtrado
-    const context = await getClinicalContext(lastMessage, category, expert);
+    const context = await getClinicalContext(lastMessage, category, expert, source);
 
     // 2. Ajustar el tono según el modo
     let modeInstructions = "";
