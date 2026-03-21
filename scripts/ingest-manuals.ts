@@ -94,9 +94,11 @@ async function ingest() {
       console.log(`\n📄 Procesando: ${fileName} [Expert: ${expert}, Category: ${category}]...`);
       console.log(`🧩 Fragmentos totales: ${chunks.length} (En DB: ${existingCount || 0}).`);
 
-      for (let i = (existingCount || 0); i < chunks.length; i++) {
-        const chunk = chunks[i];
-        if (chunk.length < 20) continue;
+      const BATCH_SIZE = 100;
+      for (let i = (existingCount || 0); i < chunks.length; i += BATCH_SIZE) {
+        const batchChunks = chunks.slice(i, i + BATCH_SIZE);
+        const validBatch = batchChunks.filter(c => c.length >= 20);
+        if (validBatch.length === 0) continue;
 
         let retryCount = 0;
         const maxRetries = 7;
@@ -104,70 +106,67 @@ async function ingest() {
 
         while (retryCount < maxRetries && !success) {
           try {
-            // Timeout promise: 25 seconds
-            const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('TIMEOUT_API')), 25000)
-            );
-
-            // Embedding promise
-            const embeddingPromise = embeddingModel.embedContent({
-              content: { role: 'user', parts: [{ text: chunk }] },
-              // @ts-ignore
-              outputDimensionality: 768
+            console.log(`📡 Enviando lote de ${validBatch.length} fragmentos (Progreso: ${i}/${chunks.length})...`);
+            
+            // 1. Obtener embeddings en lote
+            const result = await embeddingModel.batchEmbedContents({
+              requests: validBatch.map(text => ({
+                content: { role: 'user', parts: [{ text }] },
+                // @ts-ignore
+                outputDimensionality: 768
+              }))
             });
 
-            // Race!
-            const result: any = await Promise.race([embeddingPromise, timeoutPromise]);
-            const embedding = result.embedding.values;
+            const embeddings = result.embeddings.map(e => e.values);
+
+            // 2. Insertar en Supabase en lote
+            const rows = validBatch.map((chunk, index) => ({
+              content: chunk,
+              embedding: embeddings[index],
+              category: category,
+              expert: expert,
+              metadata: {
+                source: fileName,
+                full_path: relativePath.split(path.sep).join('/'),
+                chunk_index: i + index,
+                total_chunks: chunks.length
+              }
+            }));
 
             const { error } = await supabase
               .from('manual_knowledge')
-              .insert({
-                content: chunk,
-                embedding: embedding,
-                category: category,
-                expert: expert,
-                metadata: {
-                  source: fileName,
-                  full_path: relativePath,
-                  chunk_index: i,
-                  total_chunks: chunks.length
-                }
-              });
+              .insert(rows);
 
             if (error) throw error;
             
-            if (i % 20 === 0) process.stdout.write(`${Math.round((i/chunks.length)*100)}% `);
-            else if (i % 2 === 0) process.stdout.write('.');
+            console.log(`✅ Lote completado.`);
             
             success = true;
-            // Esperar 4 segundos entre fragmentos exitosos para respetar el límite RPM (15)
-            await new Promise(resolve => setTimeout(resolve, 4000));
+            // En lote de 100, 1 petición por minuto es MUY seguro para el límite de 15 peticiones/min
+            await new Promise(resolve => setTimeout(resolve, 2000));
           } catch (err: any) {
             retryCount++;
             const errorMessage = err.message?.toLowerCase() || "";
-            const isTimeout = errorMessage.includes('timeout');
             const is429 = errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('rate');
             
-            // Backoff exponencial más agresivo para 429
+            if (retryCount >= maxRetries) {
+              if (is429) {
+                console.error(`\n❌ Cuota diaria de la API agotada.`);
+                throw new Error(`QUOTA_EXCEEDED: Límite alcanzado en ${fileName} @ ${i}`);
+              }
+              throw new Error(`PERMANENT_BATCH_ERROR: ${fileName} @ ${i}`);
+            }
+
             const delay = is429 
-              ? Math.pow(2, retryCount + 2) * 1000 + Math.random() * 2000
+              ? Math.pow(2, retryCount + 3) * 1000 + Math.random() * 2000
               : Math.pow(2, retryCount) * 1000 + Math.random() * 1000;
             
-            process.stdout.write(`\n⚠️ Error en chunk ${i} (${isTimeout ? 'Timeout' : is429 ? '429/Quota' : err.message}). Reintento ${retryCount}/${maxRetries} en ${Math.round(delay/1000)}s...`);
+            console.log(`⚠️ Reintentando lote en ${Math.round(delay/1000)}s... (${retryCount}/${maxRetries})`);
             await new Promise(resolve => setTimeout(resolve, delay));
-            
-            if (retryCount >= maxRetries) {
-              console.error(`\n❌ Se agotaron los reintentos para el fragmento ${i} de ${fileName}.`);
-              if (is429) {
-                throw new Error(`QUOTA_EXCEEDED: Límite diario alcanzado en ${fileName} @ ${i}`);
-              }
-              throw new Error(`PERMANENT_CHUNK_ERROR: ${fileName} @ ${i}`);
-            }
           }
         }
       }
-      console.log(`\n✅ ${fileName} completado.`);
+      console.log(`\n🎉 ${fileName} procesado totalmente.`);
     } catch (error: any) {
       console.error(`\n❌ Error procesando ${fileName}:`, error.message);
       throw error; // Propagar para el reinicio global
