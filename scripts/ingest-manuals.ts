@@ -26,6 +26,8 @@ const model = genAI.getGenerativeModel({
 const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
 
 const MANUALS_DIR = './docs/manuals';
+let totalProcessedInRun = 0;
+const MAX_FRAGMENTS_PER_RUN = 1000;
 
 async function ingest() {
   console.log('🚀 Iniciando proceso de ingesta de manuales...');
@@ -141,7 +143,12 @@ async function ingest() {
 
             if (error) throw error;
             
-            console.log(`✅ Lote completado.`);
+            totalProcessedInRun += validBatch.length;
+            console.log(`✅ Lote completado. total procesado en esta sesión: ${totalProcessedInRun}/${MAX_FRAGMENTS_PER_RUN}`);
+
+            if (totalProcessedInRun >= MAX_FRAGMENTS_PER_RUN) {
+              throw new Error('RUN_LIMIT_REACHED');
+            }
             
             success = true;
             // Un respiro de 5s para ser muy conservadores con los límites TPM/RPM gratuitos
@@ -180,15 +187,23 @@ async function ingest() {
 
 async function runWithRestart() {
   const MAX_GLOBAL_RESTARTS = 20;
+  const MAX_FRAGMENTS_PER_RUN = 1000; // Límite de seguridad para no agotar la cuota del chat
   let restarts = 0;
+  let totalProcessedInRun = 0;
 
   while (restarts < MAX_GLOBAL_RESTARTS) {
     try {
+      console.log(`🛡️ Iniciando ciclo de ingesta (Límite de seguridad: ${MAX_FRAGMENTS_PER_RUN} fragmentos)...`);
       await ingest();
-      break; // Éxito total
+      break; 
     } catch (err: any) {
       if (err.message && err.message.includes('QUOTA_EXCEEDED')) {
-        console.log('\n🛑 Límite de cuota diaria detectado. Deteniendo ejecución. El Cron Job de GitHub Actions la retomará mañana automáticamente.');
+        console.log('\n🛑 Límite de cuota diaria detectado. Deteniendo ejecución.');
+        process.exit(0);
+      }
+      if (err.message && err.message.includes('RUN_LIMIT_REACHED')) {
+        console.log(`\n✅ Se ha alcanzado el límite de seguridad de ${MAX_FRAGMENTS_PER_RUN} fragmentos para esta sesión.`);
+        console.log('🛡️ Deteniendo ingesta para preservar cuota para el chat del usuario.');
         process.exit(0);
       }
       restarts++;

@@ -5,11 +5,13 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { planId } = useParams();
   const { t } = useLanguage();
+  const { encryptionKey, user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [smartText, setSmartText] = useState("");
@@ -60,16 +62,30 @@ const RegisterPage = () => {
       return;
     }
 
+    if (!encryptionKey) {
+      toast.error(t('sec.decrypt_error'));
+      return;
+    }
+
     setIsSaving(true);
     try {
+      const rawData = { 
+        ...form, 
+        plan: planId || 'general',
+        recorded_at: new Date().toISOString()
+      };
+
+      // ENCRYPT DATA
+      const { encryptData } = await import("@/lib/crypto");
+      const encryptedBlob = await encryptData(rawData, encryptionKey);
+
       const { error } = await supabase
         .from('autorregistros')
         .insert([
           { 
+            user_id: user?.id,
             data: { 
-              ...form, 
-              plan: planId || 'general',
-              recorded_at: new Date().toISOString()
+              encrypted_data: encryptedBlob
             } 
           }
         ]);
@@ -94,7 +110,6 @@ const RegisterPage = () => {
       : "text-secondary";
 
   const handleTelegramConnect = () => {
-    // Redirige al bot de Telegram real
     window.open("https://t.me/Autorregistro_bot", "_blank");
   };
 

@@ -210,6 +210,20 @@ export const translations = {
     'login.password': 'Contraseña',
     'login.btn': 'Entrar',
     'login.error': 'Credenciales incorrectas',
+
+    // Signup
+    'signup.title': 'Crear Cuenta Herbie',
+    'signup.subtitle': 'Privacidad absoluta desde el primer paso',
+    'signup.username': 'Email',
+    'signup.password': 'Contraseña',
+    'signup.btn': 'Registrarse',
+    'signup.already_have': '¿Ya tienes cuenta? Entra aquí',
+    'signup.success': 'Cuenta creada. Revisa tu email para confirmar.',
+    'signup.error': 'Error al crear la cuenta',
+
+    // Security
+    'sec.e2ee_on': '🔒 Datos Encriptados (E2EE)',
+    'sec.decrypt_error': 'Error al desencriptar. ¿Cambiaste tu contraseña?',
   },
   en: {
     // Navigation
@@ -420,5 +434,19 @@ export const translations = {
     'login.password': 'Password',
     'login.btn': 'Sign In',
     'login.error': 'Invalid credentials',
+
+    // Signup
+    'signup.title': 'Create Herbie Account',
+    'signup.subtitle': 'Absolute privacy from the first step',
+    'signup.username': 'Email',
+    'signup.password': 'Password',
+    'signup.btn': 'Sign Up',
+    'signup.already_have': 'Already have an account? Sign in',
+    'signup.success': 'Account created. Check your email to confirm.',
+    'signup.error': 'Error creating account',
+
+    // Security
+    'sec.e2ee_on': '🔒 Encrypted Data (E2EE)',
+    'sec.decrypt_error': 'Decryption error. Did you change your password?',
   }
 };

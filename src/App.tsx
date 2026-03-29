@@ -14,9 +14,7 @@ import HomePage from "./pages/HomePage";
 import ABAPage from "./pages/ABAPage";
 import LearningMode from "./pages/LearningMode";
 import LoginPage from "./pages/LoginPage";
-import CovertPage from "./pages/CovertPage";
-import CaseExpertPage from "./pages/CaseExpertPage";
-import AlexithymiaPage from "./pages/AlexithymiaPage";
+import SignupPage from "./pages/SignupPage";
 import NotFound from "./pages/NotFound";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 
@@ -26,10 +24,20 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen herbie-bg flex items-center justify-center">
+        <div className="w-8 h-8 herbie-gradient rounded-lg animate-pulse" />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+  
   return <>{children}</>;
 };
 
@@ -43,6 +51,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
               
               <Route path="/" element={
                 <ProtectedRoute>
@@ -76,8 +85,6 @@ const App = () => (
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/aba" element={<ABAPage />} />
                 <Route path="/learning" element={<LearningMode />} />
-                <Route path="/covert" element={<CovertPage />} />
-                <Route path="/case-expert" element={<CaseExpertPage />} />
               </Route>
               
               <Route path="/chat" element={

@@ -8,6 +8,7 @@ import { es, enUS } from "date-fns/locale";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -68,26 +69,53 @@ const Dashboard = () => {
     }
   });
 
+  const { encryptionKey, user } = useAuth();
+
   // Fetch autorregistros from Supabase
   const { data: logs, isLoading } = useQuery({
-    queryKey: ['autorregistros', planId],
+    queryKey: ['autorregistros', planId, user?.id],
     queryFn: async () => {
+      if (!user) return [];
+
       let query = supabase
         .from('autorregistros')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(10);
-      
-      if (planId) {
-        query = query.eq('data->>plan', planId);
-      }
+        .limit(20);
       
       const { data, error } = await query;
       
       if (error) throw error;
-      return data;
+      if (!data) return [];
+
+      // DECRYPT DATA
+      if (!encryptionKey) return data; // Wait for key
+
+      const { decryptData } = await import("@/lib/crypto");
+      
+      const decryptedLogs = await Promise.all(data.map(async (log) => {
+        if (log.data && log.data.encrypted_data) {
+          try {
+            const decrypted = await decryptData(log.data.encrypted_data, encryptionKey);
+            return { ...log, data: decrypted };
+          } catch (e) {
+            console.error("Failed to decrypt log:", log.id, e);
+            return { ...log, data: { ...log.data, error: t('sec.decrypt_error') } };
+          }
+        }
+        return log;
+      }));
+
+      // Filter by planId after decryption if planId is present
+      if (planId && planId !== 'general') {
+        return decryptedLogs.filter(log => log.data.plan === planId);
+      }
+
+      return decryptedLogs;
     },
-    refetchInterval: 5000, // Polling cada 5 segundos para ver registros nuevos del bot
+    enabled: !!user && !!encryptionKey,
+    refetchInterval: 10000, 
   });
 
   const cards = [

@@ -6,24 +6,25 @@ import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { toast } from "sonner";
 
-const LoginPage = () => {
+const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signUp } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      await signIn(email, password);
-      toast.success(t('login.btn'));
-      navigate("/");
+      await signUp(email, password);
+      toast.success(t('signup.success'));
+      navigate("/login");
     } catch (error: any) {
-      toast.error(error.message || t('login.error'));
+      toast.error(error.message || t('signup.error'));
+    } finally {
       setIsLoading(false);
     }
   };
@@ -54,10 +55,10 @@ const LoginPage = () => {
           </motion.div>
           
           <h1 className="text-2xl font-black text-foreground tracking-tight mb-2">
-            HERBIE <span className="text-primary">SYSTEM</span>
+            HERBIE <span className="text-primary">JOIN</span>
           </h1>
           <p className="text-sm text-muted-foreground font-medium">
-            {t('login.subtitle')}
+            {t('signup.subtitle')}
           </p>
         </div>
 
@@ -65,7 +66,7 @@ const LoginPage = () => {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          onSubmit={handleLogin}
+          onSubmit={handleSignup}
           className="herbie-card p-8 border-primary/10 bg-card/50 backdrop-blur-xl space-y-5"
         >
           <div className="space-y-1.5">
@@ -87,7 +88,7 @@ const LoginPage = () => {
 
           <div className="space-y-1.5">
             <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">
-              {t('login.password')}
+              {t('signup.password')}
             </label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -98,6 +99,7 @@ const LoginPage = () => {
                 placeholder="••••••••"
                 className="w-full bg-muted/50 border border-border/50 rounded-xl pl-10 pr-4 py-3 text-sm focus:ring-2 ring-primary/20 outline-none transition-all"
                 required
+                minLength={6}
               />
             </div>
           </div>
@@ -105,7 +107,7 @@ const LoginPage = () => {
           <div className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
             <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
             <p className="text-[10px] text-primary/80 leading-tight">
-              {t('sec.e2ee_on')}: Enters your local clinical key.
+              {t('sec.e2ee_on')}: Your password generates your clinical key locally.
             </p>
           </div>
 
@@ -118,16 +120,16 @@ const LoginPage = () => {
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                {t('login.btn')}
+                {t('signup.btn')}
               </>
             )}
           </button>
 
           <Link 
-            to="/signup"
+            to="/login"
             className="block text-center text-xs text-muted-foreground hover:text-primary transition-colors mt-2"
           >
-            No account? Create one
+            {t('signup.already_have')}
           </Link>
         </motion.form>
 
@@ -137,11 +139,11 @@ const LoginPage = () => {
           transition={{ delay: 0.5 }}
           className="text-center mt-8 text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]"
         >
-          H.E.R.B.I.E. V2.5.0 • PROTECTED SYSTEM
+          H.E.R.B.I.E. SECURE NODE • V2.5.0
         </motion.p>
       </motion.div>
     </div>
   );
 };
 
-export default LoginPage;
+export default SignupPage;

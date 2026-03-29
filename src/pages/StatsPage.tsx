@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format, subDays, startOfDay, isWithinInterval, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 const barColors = [
   "hsl(var(--primary))",
@@ -21,19 +22,44 @@ const barColors = [
 const StatsPage = () => {
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
+  const { user, encryptionKey } = useAuth();
   const dateLocale = lang === 'es' ? es : enUS;
 
   const { data: logs, isLoading } = useQuery({
-    queryKey: ['autorregistros-stats'],
+    queryKey: ['autorregistros-stats', user?.id],
     queryFn: async () => {
+      if (!user) return [];
+
       const { data, error } = await supabase
         .from('autorregistros')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: true });
       
       if (error) throw error;
-      return data;
-    }
+      if (!data) return [];
+
+      // DECRYPT DATA
+      if (!encryptionKey) return data;
+
+      const { decryptData } = await import("@/lib/crypto");
+      
+      const decryptedLogs = await Promise.all(data.map(async (log) => {
+        if (log.data && log.data.encrypted_data) {
+          try {
+            const decrypted = await decryptData(log.data.encrypted_data, encryptionKey);
+            return { ...log, data: decrypted };
+          } catch (e) {
+            console.error("Failed to decrypt log for stats:", log.id, e);
+            return { ...log, data: { ...log.data, error: "Decrypt Error" } };
+          }
+        }
+        return log;
+      }));
+
+      return decryptedLogs;
+    },
+    enabled: !!user && !!encryptionKey
   });
 
   // Procesamiento de datos para los gráficos

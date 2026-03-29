@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 const SettingsPage = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { logout } = useAuth();
+  const { signOut, user } = useAuth();
 
   return (
     <div className="px-4 pt-4 space-y-6">
@@ -27,7 +27,7 @@ const SettingsPage = () => {
         className="herbie-card p-4 space-y-3"
       >
         <div className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-accent" />
+          <bookOpen className="w-4 h-4 text-accent" />
           <h3 className="text-sm font-semibold text-foreground">{t('settings.active_manual')}</h3>
         </div>
         <div className="bg-muted rounded-lg p-3 flex items-center gap-3">
@@ -72,10 +72,10 @@ const SettingsPage = () => {
         className="herbie-card p-4 space-y-3"
       >
         <h3 className="text-sm font-semibold text-foreground">{t('settings.account')}</h3>
-        <p className="text-xs text-muted-foreground">admin@herbie.ai</p>
+        <p className="text-xs text-muted-foreground">{user?.email || 'admin@herbie.ai'}</p>
         <button 
-          onClick={() => {
-            logout();
+          onClick={async () => {
+            await signOut();
             navigate("/login");
           }}
           className="w-full border border-border text-foreground rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-muted transition-colors"
