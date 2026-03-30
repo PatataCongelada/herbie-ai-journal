@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import ToolRecordsView from "@/components/clinical/ToolRecordsView";
+import ToolAssistantBot from "@/components/clinical/ToolAssistantBot";
 
 type ViewMode = "hub" | "history" | "guided";
 
@@ -16,8 +17,6 @@ const AlexithymiaPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("hub");
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGuiding, setIsGuiding] = useState(false);
-  const [guideText, setGuideText] = useState("");
   
   const [alexData, setAlexData] = useState({
     sensation: "",
@@ -25,45 +24,6 @@ const AlexithymiaPage = () => {
     intensity: "5",
     label: ""
   });
-
-  const getGuide = async (currentStep: number) => {
-    setIsGuiding(true);
-    setGuideText("");
-    
-    const steps = ["sensation", "situation", "intensity", "label"];
-    const prompt = `${t('alex.guide_prompt')} ${steps[currentStep-1]}.`;
-
-    try {
-      const response = await fetch("/api/clinical-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          messages: [{ role: "user", content: prompt }],
-          category: "practica",
-          expert: "all",
-          source: [
-            "Tratamiento-basado-ABA.Guia-de-practica-clinica.pdf",
-            "modificacion de conducta que es y como aplicarla.pdf"
-          ]
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setGuideText(data.text);
-      }
-    } catch (error) {
-      console.error("Error fetching guide:", error);
-    } finally {
-      setIsGuiding(false);
-    }
-  };
-
-  useEffect(() => {
-    if (viewMode === "guided") {
-      getGuide(step);
-    }
-  }, [viewMode, step]);
 
   const { user, encryptionKey } = useAuth();
 
@@ -175,32 +135,17 @@ const AlexithymiaPage = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto no-scrollbar pt-6 pb-40 px-6 max-w-2xl mx-auto w-full space-y-8">
-            {/* Guide Card */}
-            <AnimatePresence mode="wait">
-                <motion.div 
-                    key={step}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="p-6 bg-rose-500/5 border border-rose-500/10 rounded-[2rem] space-y-3 relative"
-                >
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-lg bg-rose-500 flex items-center justify-center">
-                            <Sparkles className="w-3 h-3 text-white" />
-                        </div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-rose-500">{t('guided.ai_guide')}</label>
-                    </div>
-                    {isGuiding ? (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse py-2">
-                            <Loader2 className="w-3 h-3 animate-spin" /> {t('aba.thinking')}
-                        </div>
-                    ) : (
-                        <p className="text-xs text-rose-600/80 leading-relaxed font-semibold italic italic">
-                            {guideText}
-                        </p>
-                    )}
-                </motion.div>
-            </AnimatePresence>
+            {/* Herbie's Interactive Bot */}
+            <ToolAssistantBot 
+              toolId={t('alex.title')}
+              source={[
+                "Tratamiento-basado-ABA.Guia-de-practica-clinica.pdf",
+                "modificacion de conducta que es y como aplicarla.pdf"
+              ]}
+              currentStep={step}
+              stepName={t(`alex.step_${step}`)}
+              color="rose"
+            />
 
             {/* Step Content */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">

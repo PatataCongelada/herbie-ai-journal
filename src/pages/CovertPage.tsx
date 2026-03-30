@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import ToolRecordsView from "@/components/clinical/ToolRecordsView";
+import ToolAssistantBot from "@/components/clinical/ToolAssistantBot";
 
 type ViewMode = "hub" | "history" | "guided";
 
@@ -16,8 +17,6 @@ const CovertPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("hub");
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
-  const [guideText, setGuideText] = useState("");
-  const [isGuiding, setIsGuiding] = useState(false);
 
   const [planData, setPlanData] = useState({
     title: "",
@@ -26,50 +25,6 @@ const CovertPage = () => {
     stimuli: "",
     procedure: ""
   });
-
-  const getGuideFromAI = async (currentStep: number) => {
-    setIsGuiding(true);
-    setGuideText("");
-    
-    const steps = [
-      "context", 
-      "objectives", 
-      "technique", 
-      "procedure"
-    ];
-    
-    const prompt = `Actúa como un supervisor clínico experto. Estamos diseñando un plan de Condicionamiento Encubierto. 
-    Basándote en el manual de Cautela, dame una guía breve (máximo 2 párrafos) de qué debería incluir el profesional en el paso: ${steps[currentStep-1]}. 
-    No redactes el plan aún, solo da instrucciones técnicas y consejos basados en el manual.`;
-
-    try {
-      const response = await fetch("/api/clinical-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          messages: [{ role: "user", content: prompt }],
-          category: "teoria",
-          expert: "all",
-          source: "Covert_Conditioning_Handbook.pdf"
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setGuideText(data.text);
-      }
-    } catch (error) {
-      console.error("Error fetching guide:", error);
-    } finally {
-      setIsGuiding(false);
-    }
-  };
-
-  useEffect(() => {
-    if (viewMode === "guided") {
-      getGuideFromAI(step);
-    }
-  }, [viewMode, step]);
 
   const handleGenerateFull = async () => {
     setIsLoading(true);
@@ -215,32 +170,14 @@ const CovertPage = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pt-6 pb-40 px-6 max-w-2xl mx-auto w-full space-y-8">
-        {/* Herbie's Guide Card */}
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={step}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="p-6 bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] space-y-3 relative"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg herbie-gradient flex items-center justify-center">
-                <Brain className="w-3 h-3 text-white" />
-              </div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{t('guided.ai_guide')}</label>
-            </div>
-            {isGuiding ? (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse py-2">
-                <Loader2 className="w-3 h-3 animate-spin" /> {t('aba.thinking')}
-              </div>
-            ) : (
-              <p className="text-xs text-indigo-600/80 leading-relaxed font-medium italic">
-                {guideText || t('guided.ai_guide_placeholder')}
-              </p>
-            )}
-          </motion.div>
-        </AnimatePresence>
+        {/* Herbie's Interactive Bot */}
+        <ToolAssistantBot 
+          toolId={t('plan.covert')}
+          source="Covert_Conditioning_Handbook.pdf"
+          currentStep={step}
+          stepName={t(`guided.step_${step}`)}
+          color="indigo"
+        />
 
         {/* Input Fields based on step */}
         <motion.div 
