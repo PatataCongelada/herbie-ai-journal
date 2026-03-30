@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, Upload, LogOut, FileText } from "lucide-react";
+import { ArrowLeft, BookOpen, Upload, LogOut, FileText, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
@@ -9,8 +9,13 @@ const SettingsPage = () => {
   const { t } = useLanguage();
   const { signOut, user } = useAuth();
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/login");
+  };
+
   return (
-    <div className="px-4 pt-4 space-y-6">
+    <div className="px-4 pt-4 space-y-6 pb-32">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -18,6 +23,27 @@ const SettingsPage = () => {
         </button>
         <h1 className="text-lg font-semibold text-foreground">{t('settings.title')}</h1>
       </div>
+
+      {/* Account Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="herbie-card p-4 space-y-3"
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <User className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-semibold text-foreground">{t('settings.account')}</h3>
+        </div>
+        <div className="bg-muted/50 rounded-xl p-3 flex items-center gap-3">
+          <div className="w-10 h-10 herbie-gradient rounded-xl flex items-center justify-center text-white font-black text-lg">
+            {user?.email?.[0]?.toUpperCase() || "H"}
+          </div>
+          <div>
+            <p className="text-sm font-bold text-foreground">{user?.email || 'herbie@example.com'}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Usuario activo</p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Active Manual */}
       <motion.div
@@ -27,7 +53,7 @@ const SettingsPage = () => {
         className="herbie-card p-4 space-y-3"
       >
         <div className="flex items-center gap-2">
-          <bookOpen className="w-4 h-4 text-accent" />
+          <BookOpen className="w-4 h-4 text-accent" />
           <h3 className="text-sm font-semibold text-foreground">{t('settings.active_manual')}</h3>
         </div>
         <div className="bg-muted rounded-lg p-3 flex items-center gap-3">
@@ -64,24 +90,21 @@ const SettingsPage = () => {
         </button>
       </motion.div>
 
-      {/* Account */}
+      {/* Logout — Danger Zone */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: 0.1 }}
-        className="herbie-card p-4 space-y-3"
+        transition={{ duration: 0.2, delay: 0.15 }}
+        className="herbie-card p-4 space-y-3 border-red-500/20"
       >
-        <h3 className="text-sm font-semibold text-foreground">{t('settings.account')}</h3>
-        <p className="text-xs text-muted-foreground">{user?.email || 'admin@herbie.ai'}</p>
+        <h3 className="text-sm font-semibold text-red-500">Cerrar sesión</h3>
+        <p className="text-xs text-muted-foreground">Saldrás de tu cuenta. Podrás volver a entrar con tus credenciales.</p>
         <button 
-          onClick={async () => {
-            await signOut();
-            navigate("/login");
-          }}
-          className="w-full border border-border text-foreground rounded-xl py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-muted transition-colors"
+          onClick={handleLogout}
+          className="w-full bg-red-500 text-white rounded-xl py-3 text-sm font-black flex items-center justify-center gap-2 hover:bg-red-600 active:scale-95 transition-all shadow-lg shadow-red-500/20"
         >
           <LogOut className="w-4 h-4" />
-          {t('settings.logout')}
+          Cerrar sesión
         </button>
       </motion.div>
     </div>
