@@ -97,7 +97,7 @@ Genera la especificación completa para la técnica/protocolo: "${topic}".
 Sé muy específico con los campos (idealmente 3-5 campos por paso, máximo 5 pasos).`;
 
     const chatModel = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: systemPrompt
     });
 

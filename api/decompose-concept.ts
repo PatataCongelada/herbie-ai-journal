@@ -12,7 +12,7 @@ if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
-const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
+const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
 
 async function getClinicalContext(query: string, source?: string): Promise<string> {
   try {
@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 2. Configurar el modelo para generar el programa de aprendizaje
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       generationConfig: {
         responseMimeType: "application/json"
       }

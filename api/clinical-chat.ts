@@ -91,7 +91,7 @@ ${context}`;
 
     // 3. Configurar el modelo con las instrucciones específicas
     const chatModel = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: systemPrompt 
     });
 
