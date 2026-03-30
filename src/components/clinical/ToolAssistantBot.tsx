@@ -22,6 +22,8 @@ const ToolAssistantBot = ({ toolId, source, currentStep, stepName, color = "indi
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [hasNewMessage, setHasNewMessage] = useState(false);
 
   const colorStyles = {
     indigo: {
@@ -54,7 +56,7 @@ const ToolAssistantBot = ({ toolId, source, currentStep, stepName, color = "indi
     setIsLoading(true);
     const prompt = `Actúa como un supervisor clínico experto y empático. Estamos en la herramienta "${toolId}" y el usuario está en el paso: "${stepName}". 
     El usuario NO TIENE ni idea de psicología. Explícale este paso de forma ultra-sencilla basándote exclusivamente en el manual: ${Array.isArray(source) ? source.join(', ') : source}. 
-    Saluda brevemente y dile qué debe hacer en este campo. No redactes el plan aún, solo guía.`;
+    Saluda brevemente y dile qué debe hacer en este campo. No redactes el plan aún, solo da instrucciones técnicas y consejos basados en el manual.`;
 
     try {
       const response = await fetch("/api/clinical-chat", {
@@ -70,7 +72,11 @@ const ToolAssistantBot = ({ toolId, source, currentStep, stepName, color = "indi
 
       const data = await response.json();
       if (response.ok) {
-        setMessages([{ role: "assistant", content: data.text }]);
+        setMessages(prev => [
+          ...prev, 
+          { role: "assistant", content: `📍 **${stepName}**\n\n${data.text}` }
+        ]);
+        if (isMinimized) setHasNewMessage(true);
       }
     } catch (error) {
        console.error("Assistant Error:", error);
@@ -81,7 +87,7 @@ const ToolAssistantBot = ({ toolId, source, currentStep, stepName, color = "indi
 
   useEffect(() => {
     getInitialGuide();
-  }, [currentStep]);
+  }, [currentStep, toolId]); // Also react if toolId changes
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -122,79 +128,120 @@ const ToolAssistantBot = ({ toolId, source, currentStep, stepName, color = "indi
   };
 
   return (
-    <div className={`p-6 ${colorStyles.bg} border ${colorStyles.border} rounded-[2rem] space-y-4 flex flex-col h-[400px] shadow-sm relative overflow-hidden backdrop-blur-sm`}>
-      <div className="flex items-center justify-between border-b border-border/10 pb-2">
-        <div className="flex items-center gap-2">
-          <div className={`w-8 h-8 rounded-xl ${colorStyles.icon} flex items-center justify-center`}>
-            <Brain className="w-4 h-4 text-white" />
-          </div>
-          <span className={`text-[10px] font-black uppercase tracking-widest ${colorStyles.accent}`}>
-            Guía de {t('nav.home').toLowerCase()} herbie
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <HelpCircle className={`w-4 h-4 ${colorStyles.accent} opacity-40`} />
-        </div>
-      </div>
-
+    <motion.div 
+      initial={false}
+      animate={{ height: isMinimized ? "64px" : "450px" }}
+      className={`sticky top-0 z-20 ${colorStyles.bg} border ${colorStyles.border} rounded-[2rem] flex flex-col shadow-xl shadow-primary/5 relative overflow-hidden backdrop-blur-md transition-all duration-300 ease-in-out`}
+    >
       <div 
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-4 pr-1 no-scrollbar scroll-smooth"
+        onClick={() => {
+          setIsMinimized(!isMinimized);
+          if (!isMinimized) setHasNewMessage(false);
+        }}
+        className="flex items-center justify-between p-4 px-6 cursor-pointer hover:bg-black/5 transition-colors"
       >
-        <AnimatePresence initial={false}>
-          {messages.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] leading-relaxed shadow-sm font-medium ${
-                msg.role === "user" 
-                  ? `${colorStyles.button} text-white rounded-tr-none` 
-                  : "bg-card border border-border/50 text-foreground rounded-tl-none"
-              }`}>
-                {msg.content}
-              </div>
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-xl ${colorStyles.icon} flex items-center justify-center relative shadow-lg`}>
+            <Brain className="w-4 h-4 text-white" />
+            <AnimatePresence>
+              {hasNewMessage && (
+                <motion.span 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"
+                />
+              )}
+            </AnimatePresence>
+          </div>
+          <div className="text-left">
+            <span className={`text-[10px] font-black uppercase tracking-widest ${colorStyles.accent}`}>
+              Herbie Assistant
+            </span>
+            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tighter opacity-70">
+              {isMinimized ? (t('guided.show_guide') || 'Ver guía interactiva') : stepName}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {isLoading && <Loader2 className={`w-3 h-3 animate-spin ${colorStyles.accent}`} />}
+          <div className={`p-1.5 rounded-lg bg-card border border-border/50`}>
+            <motion.div animate={{ rotate: isMinimized ? 180 : 0 }}>
+              <HelpCircle className={`w-4 h-4 ${colorStyles.accent} opacity-60`} />
             </motion.div>
-          ))}
-          {isLoading && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex justify-start"
-            >
-              <div className="bg-card border border-border/50 p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
-                <Loader2 className={`w-3 h-3 animate-spin ${colorStyles.accent}`} />
-                <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{t('aba.thinking')}</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        </div>
       </div>
 
-      <div className="flex gap-2 bg-background/50 p-2 rounded-[1.5rem] border border-border/30 shadow-inner">
-        <input 
-          type="text" 
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Hazme una pregunta sobre este paso..."
-          className="flex-1 bg-transparent border-none text-[11px] font-medium outline-none px-2 h-8"
-        />
-        <button 
-          onClick={handleSend}
-          disabled={!input.trim() || isLoading}
-          className={`w-8 h-8 ${colorStyles.button} text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-95 disabled:opacity-50`}
-        >
-          <Send className="w-4 h-4" />
-        </button>
-      </div>
+      <AnimatePresence>
+        {!isMinimized && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex-1 flex flex-col min-h-0 pt-0 p-6 space-y-4"
+          >
+            <div 
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto space-y-4 pr-1 no-scrollbar scroll-smooth"
+            >
+              <AnimatePresence initial={false}>
+                {messages.map((msg, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div className={`max-w-[85%] p-3 rounded-2xl text-[11px] leading-relaxed shadow-sm font-medium ${
+                      msg.role === "user" 
+                        ? `${colorStyles.button} text-white rounded-tr-none` 
+                        : "bg-card border border-border/50 text-foreground rounded-tl-none"
+                    }`}>
+                      {msg.content}
+                    </div>
+                  </motion.div>
+                ))}
+                {isLoading && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-start"
+                  >
+                    <div className="bg-card border border-border/50 p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
+                      <Loader2 className={`w-3 h-3 animate-spin ${colorStyles.accent}`} />
+                      <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{t('aba.thinking')}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="flex gap-2 bg-background/50 p-2 rounded-[1.5rem] border border-border/30 shadow-inner">
+              <input 
+                type="text" 
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                placeholder="Hazme una pregunta sobre este paso..."
+                className="flex-1 bg-transparent border-none text-[11px] font-medium outline-none px-2 h-8"
+              />
+              <button 
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                className={`w-8 h-8 ${colorStyles.button} text-white rounded-xl flex items-center justify-center shadow-lg transition-transform active:scale-95 disabled:opacity-50`}
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Decorative patterns */}
-      <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full ${colorStyles.button} opacity-[0.03] blur-3xl`} />
-      <div className={`absolute -bottom-10 -left-10 w-24 h-24 rounded-full ${colorStyles.button} opacity-[0.03] blur-3xl`} />
-    </div>
+      <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full ${colorStyles.button} opacity-[0.1] blur-3xl -z-10`} />
+      <div className={`absolute -bottom-10 -left-10 w-24 h-24 rounded-full ${colorStyles.button} opacity-[0.1] blur-3xl -z-10`} />
+    </motion.div>
   );
 };
 
