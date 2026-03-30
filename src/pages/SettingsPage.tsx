@@ -90,6 +90,28 @@ const SettingsPage = () => {
         </button>
       </motion.div>
 
+      {/* Clinical Design Lab */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, delay: 0.1 }}
+        className="herbie-card p-4 space-y-3 border-violet-500/20"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🔬</span>
+          <h3 className="text-sm font-semibold text-foreground">Laboratorio de Diseño Clínico</h3>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Consulta los manuales clínicos para generar una especificación completa de cualquier herramienta de intervención y exportarla como PDF.
+        </p>
+        <button 
+          onClick={() => navigate("/architect")}
+          className="w-full bg-violet-500 text-white rounded-xl py-3 text-sm font-black flex items-center justify-center gap-2 hover:bg-violet-600 active:scale-95 transition-all shadow-lg shadow-violet-500/20"
+        >
+          🧠 Abrir el Laboratorio
+        </button>
+      </motion.div>
+
       {/* Logout — Danger Zone */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}

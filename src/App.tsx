@@ -18,6 +18,7 @@ import CovertPage from "./pages/CovertPage";
 import CaseExpertPage from "./pages/CaseExpertPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import ArchitectPage from "./pages/ArchitectPage";
 import NotFound from "./pages/NotFound";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 
@@ -91,6 +92,7 @@ const App = () => (
                 <Route path="/learning" element={<LearningMode />} />
                 <Route path="/alexithymia" element={<AlexithymiaPage />} />
                 <Route path="/covert" element={<CovertPage />} />
+                <Route path="/architect" element={<ArchitectPage />} />
               </Route>
               
               <Route path="/chat" element={
