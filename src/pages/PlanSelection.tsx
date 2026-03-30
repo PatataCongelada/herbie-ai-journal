@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users, EyeOff, Heart, FolderKanban, ChevronDown } from "lucide-react";
+import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users, EyeOff, Heart, FolderKanban, ChevronDown, FlaskConical } from "lucide-react";
 
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -66,6 +66,17 @@ const PlanSelection = () => {
       icon: Brain,
       color: "from-blue-600 to-indigo-700",
       lightColor: "bg-indigo-500/10 text-indigo-700",
+      isBeta: true,
+      type: "brain"
+    },
+    {
+      id: "architect",
+      title: t('plan.architect'),
+      description: t('plan.architect_desc'),
+      path: "/architect",
+      icon: FlaskConical,
+      color: "from-violet-500 to-indigo-600",
+      lightColor: "bg-violet-500/10 text-violet-700",
       isBeta: true,
       type: "brain"
     },
