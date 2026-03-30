@@ -208,6 +208,11 @@ export const translations = {
     'alex.welcome_desc': 'Te ayudaré a identificar y describir matices emocionales basándome en guías clínicas.',
     'alex.chat_placeholder': '¿Cómo describirías lo que sientes ahora?',
     'alex.thinking': 'Herbie está sintonizando...',
+    'alex.step_1': 'Sensación Física',
+    'alex.step_2': 'Contexto/Situación',
+    'alex.step_3': 'Intensidad',
+    'alex.step_4': 'Etiquetado Emocional',
+    'alex.guide_prompt': 'Actúa como un psicólogo experto en regulación emocional. Estamos ayudando al usuario a identificar una emoción (Alexitimia). Basándote en guías clínicas de identificación emocional, dame una guía breve de qué preguntar o en qué fijarse para el paso: ',
 
     // 404
     '404.title': '¡Oops! Página no encontrada',
@@ -227,13 +232,29 @@ export const translations = {
     'signup.username': 'Email',
     'signup.password': 'Contraseña',
     'signup.btn': 'Registrarse',
-    'signup.already_have': '¿Ya tienes cuenta? Entra aquí',
     'signup.success': 'Cuenta creada. Revisa tu email para confirmar.',
     'signup.error': 'Error al crear la cuenta',
 
     // Security
     'sec.e2ee_on': '🔒 Datos Encriptados (E2EE)',
     'sec.decrypt_error': 'Error al desencriptar. ¿Cambiaste tu contraseña?',
+
+    // Hub & Guided
+    'hub.title': 'Centro de Herramienta',
+    'hub.choice_records': 'Planes y Mediciones',
+    'hub.choice_guided': 'Generación Guiada',
+    'hub.records_desc': 'Consulta tus planes guardados y el histórico de autorregistros.',
+    'hub.guided_desc': 'Crea un nuevo plan terapéutico paso a paso con la guía de Herbie y los manuales.',
+    'hub.back_to_hub': 'Volver al Menú',
+    'guided.step_1': 'Contexto',
+    'guided.step_2': 'Objetivos',
+    'guided.step_3': 'Técnica',
+    'guided.step_4': 'Procedimiento',
+    'guided.next': 'Siguiente',
+    'guided.prev': 'Anterior',
+    'guided.finish': 'Finalizar',
+    'guided.ai_guide': 'Guía de Herbie',
+    'guided.ai_guide_placeholder': 'Herbie te ayudará basándose en el manual...',
   },
   en: {
     // Navigation
@@ -442,6 +463,11 @@ export const translations = {
     'alex.welcome_desc': 'I will help you identify and describe emotional nuances based on clinical guides.',
     'alex.chat_placeholder': 'How would you describe what you feel now?',
     'alex.thinking': 'Herbie is tuning in...',
+    'alex.step_1': 'Physical Sensation',
+    'alex.step_2': 'Context/Situation',
+    'alex.step_3': 'Intensity',
+    'alex.step_4': 'Emotional Labeling',
+    'alex.guide_prompt': 'Act as an expert psychologist in emotional regulation. We are helping the user identify an emotion (Alexithymia). Based on clinical emotional identification guides, give me a brief guide on what to ask or what to look for for the step: ',
 
     // 404
     '404.title': 'Oops! Page not found',
@@ -468,5 +494,22 @@ export const translations = {
     // Security
     'sec.e2ee_on': '🔒 Encrypted Data (E2EE)',
     'sec.decrypt_error': 'Decryption error. Did you change your password?',
+
+    // Hub & Guided
+    'hub.title': 'Tool Center',
+    'hub.choice_records': 'Plans & Measurements',
+    'hub.choice_guided': 'Guided Generation',
+    'hub.records_desc': 'Consult your saved plans and record history.',
+    'hub.guided_desc': 'Create a new therapeutic plan step-by-step with Herbie\'s guidance and manuals.',
+    'hub.back_to_hub': 'Back to Menu',
+    'guided.step_1': 'Context',
+    'guided.step_2': 'Objectives',
+    'guided.step_3': 'Technique',
+    'guided.step_4': 'Procedure',
+    'guided.next': 'Next',
+    'guided.prev': 'Previous',
+    'guided.finish': 'Finish',
+    'guided.ai_guide': 'Herbie\'s Guide',
+    'guided.ai_guide_placeholder': 'Herbie will help you based on the manual...',
   }
 };
