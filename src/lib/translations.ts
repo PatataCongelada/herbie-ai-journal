@@ -104,6 +104,8 @@ export const translations = {
     'plan.social_skills': 'Habilidades Sociales',
     'plan.social_skills_desc': 'Entrenamiento en habilidades comunicativas y de relación interpersonal. Próximamente.',
     'plan.coming_soon': 'Próximamente',
+    'plans.folder_brains': 'Directorio de Cerebros',
+    'plans.folder_tools': 'Carpeta de Herramientas',
 
     // ABA Page
     'aba.title': 'Cerebro Experto ABA',
@@ -198,6 +200,14 @@ export const translations = {
     'learn.generate_success': 'Programa de aprendizaje generado',
     'learn.generate_error': 'No he podido generar el programa. Prueba con otro concepto.',
     'learn.complete_success': '¡Enhorabuena! Has completado el aprendizaje de ',
+
+    // Alexithymia Page
+    'alex.title': 'Identificación Emocional (Alexitimia)',
+    'alex.subtitle': 'Buscando el nombre de lo que sientes',
+    'alex.welcome_title': 'Exploremos tus emociones',
+    'alex.welcome_desc': 'Te ayudaré a identificar y describir matices emocionales basándome en guías clínicas.',
+    'alex.chat_placeholder': '¿Cómo describirías lo que sientes ahora?',
+    'alex.thinking': 'Herbie está sintonizando...',
 
     // 404
     '404.title': '¡Oops! Página no encontrada',
@@ -328,6 +338,8 @@ export const translations = {
     'plan.social_skills': 'Social Skills',
     'plan.social_skills_desc': 'Training in communication and interpersonal relationship skills. Coming soon.',
     'plan.coming_soon': 'Coming Soon',
+    'plans.folder_brains': 'Brains Directory',
+    'plans.folder_tools': 'Tools Folder',
 
     // ABA Page
     'aba.title': 'ABA Expert Brain',
@@ -422,6 +434,14 @@ export const translations = {
     'learn.generate_success': 'Learning program generated',
     'learn.generate_error': 'I could not generate the program. Try another concept.',
     'learn.complete_success': 'Congratulations! You have completed the learning of ',
+
+    // Alexithymia Page
+    'alex.title': 'Emotional Identification (Alexithymia)',
+    'alex.subtitle': 'Finding the name for what you feel',
+    'alex.welcome_title': 'Let\'s explore your emotions',
+    'alex.welcome_desc': 'I will help you identify and describe emotional nuances based on clinical guides.',
+    'alex.chat_placeholder': 'How would you describe what you feel now?',
+    'alex.thinking': 'Herbie is tuning in...',
 
     // 404
     '404.title': 'Oops! Page not found',

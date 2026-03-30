@@ -14,7 +14,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
 
-async function getClinicalContext(query: string): Promise<string> {
+async function getClinicalContext(query: string, source?: string): Promise<string> {
   try {
     const result = await embeddingModel.embedContent(query);
     const embedding = result.embedding.values;
@@ -22,13 +22,22 @@ async function getClinicalContext(query: string): Promise<string> {
     const { data: matches, error } = await supabase.rpc('match_manual_knowledge', {
       query_embedding: embedding,
       match_threshold: 0.5,
-      match_count: 5
+      match_count: 10
     });
 
     if (error || !matches || matches.length === 0) return "";
 
+    let filteredMatches = matches;
+    if (source) {
+      filteredMatches = matches.filter((m: any) => 
+        m.metadata?.source === source || m.metadata?.full_path?.includes(source)
+      );
+    }
+
+    if (filteredMatches.length === 0) return "";
+
     return "\n\nINFORMACIÓN TÉCNICA DE LOS MANUALES:\n" + 
-      matches.map((m: any) => `- ${m.content}`).join("\n");
+      filteredMatches.slice(0, 5).map((m: any) => `- ${m.content}`).join("\n");
   } catch (err) {
     console.error("Error en búsqueda semántica:", err);
     return "";
@@ -45,8 +54,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // 1. Obtener contexto clínico para ser precisos
-    const context = await getClinicalContext(concept);
+    // 1. Obtener contexto clínico para ser precisos (Filtrado por Chance Paul)
+    const context = await getClinicalContext(concept, "chance_paul_first_course_behavior_analysis_spanish_cap_1.pdf");
 
     // 2. Configurar el modelo para generar el programa de aprendizaje
     const model = genAI.getGenerativeModel({ 

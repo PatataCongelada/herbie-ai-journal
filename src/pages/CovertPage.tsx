@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, ArrowLeft, EyeOff, Sparkles, Loader2, Save, Wand2 } from "lucide-react";
+import { Brain, ArrowLeft, EyeOff, Sparkles, Loader2, Save, Wand2, Crosshair } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
@@ -25,8 +25,8 @@ const CovertPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           messages: [{ role: "user", content: t('covert.generate_prompt') }],
-          category: "all",
-          expert: "Cautela",
+          category: "teoria",
+          expert: "all",
           source: "Covert_Conditioning_Handbook.pdf"
         }),
       });
@@ -176,7 +176,7 @@ const CovertPage = () => {
           {/* Procedure */}
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-indigo-500 px-1 flex items-center gap-2">
-              <Target className="w-3 h-3" />
+              <Crosshair className="w-3 h-3" />
               {t('covert.field_procedure')}
             </label>
             <textarea 

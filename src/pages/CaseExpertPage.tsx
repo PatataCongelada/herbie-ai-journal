@@ -33,13 +33,12 @@ const CaseExpertPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           messages: [...messages, userMessage],
-          category: "all",
-          expert: "Case Supervisor", 
+          category: "practica",
+          expert: "all", 
           source: [
             "analisis_conductual_basico_y_aplicado.pdf",
-            "Análisis-funcional-de-la-conducta-humana_-Concepto_-Froxán-Parga_-María-Xesús-2020-Ediciones-Pirámid.pdf",
-            "L_AnalisisConductualAplicado-2009.pdf",
-            "chance_paul_first_course_behavior_analysis_spanish_cap_1.pdf"
+            "Handbook aplied.pdf",
+            "Tratamiento-basado-ABA.Guia-de-practica-clinica.pdf"
           ]
         }),
       });

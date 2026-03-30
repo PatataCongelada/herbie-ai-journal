@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users, EyeOff, Heart } from "lucide-react";
+import { Brain, Sparkles, Zap, Moon, BrainCircuit, GraduationCap, Users, EyeOff, Heart, FolderKanban, ChevronDown } from "lucide-react";
 
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -172,14 +172,21 @@ const PlanSelection = () => {
         </motion.div>
 
         {/* Plans List */}
-        <div className="space-y-10 max-w-md mx-auto">
+        <div className="space-y-12 max-w-md mx-auto">
           {/* Cerebros Section */}
-          <div className="space-y-4">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary px-2 flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              {t('plans.section_brains')}
-              <div className="flex-1 h-[1px] bg-gradient-to-r from-primary/20 to-transparent" />
-            </h2>
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <FolderKanban className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+                  {t('plans.folder_brains')}
+                </h2>
+                <div className="h-[1px] w-full bg-gradient-to-r from-primary/20 to-transparent mt-1" />
+              </div>
+            </div>
+            
             <div className="space-y-4">
               {plans.filter(p => p.type === 'brain').map((plan, i) => {
                 const Icon = plan.icon;
@@ -190,41 +197,51 @@ const PlanSelection = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1 }}
                     onClick={() => handleNavigate(plan)}
-                    disabled={!!plan.comingSoon}
-                    className={`w-full relative group ${plan.comingSoon ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`w-full relative group`}
                   >
-                    <div className="herbie-card p-5 flex items-center gap-5 text-left border-transparent group-hover:border-primary/20 transition-all duration-300 active:scale-[0.98]">
+                    <div className="herbie-card p-5 flex items-center gap-5 text-left border-transparent group-hover:border-primary/20 transition-all duration-300 active:scale-[0.98] bg-card/40 backdrop-blur-sm">
                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${plan.lightColor}`}>
                         <Icon className="w-7 h-7" />
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-bold text-card-foreground line-height-tight">
+                          <h3 className="text-lg font-bold text-card-foreground leading-none">
                             {plan.title}
                           </h3>
                           {plan.isBeta && (
                             <span className="text-[9px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter border border-primary/10">Beta</span>
                           )}
                         </div>
-                        <p className="text-[11px] text-muted-foreground leading-snug">
+                        <p className="text-[11px] text-muted-foreground leading-relaxed">
                           {plan.description}
                         </p>
                       </div>
                     </div>
-                    <div className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${plan.color} opacity-0 group-hover:opacity-[0.03] transition-opacity pointer-events-none`} />
                   </motion.button>
                 );
               })}
             </div>
+          </section>
+
+          {/* Separation / Scroll Hint */}
+          <div className="flex justify-center py-2 opacity-20">
+            <ChevronDown className="w-4 h-4 animate-bounce" />
           </div>
 
           {/* Herramientas Section */}
-          <div className="space-y-4 pb-4">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground px-2 flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
-              {t('plans.section_tools')}
-              <div className="flex-1 h-[1px] bg-gradient-to-r from-muted-foreground/20 to-transparent" />
-            </h2>
+          <section className="space-y-6 pb-20">
+            <div className="flex items-center gap-3 px-2">
+              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                <FolderKanban className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  {t('plans.folder_tools')}
+                </h2>
+                <div className="h-[1px] w-full bg-gradient-to-r from-muted-foreground/20 to-transparent mt-1" />
+              </div>
+            </div>
+
             <div className="space-y-4">
               {plans.filter(p => p.type === 'tool').map((plan, i) => {
                 const Icon = plan.icon;
@@ -264,7 +281,7 @@ const PlanSelection = () => {
                 );
               })}
             </div>
-          </div>
+          </section>
         </div>
       </div>
 

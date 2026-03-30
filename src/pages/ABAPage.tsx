@@ -32,8 +32,13 @@ const ABAPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           messages: [...messages, userMessage],
-          category: "all",
-          expert: "all"
+          category: "teoria",
+          expert: "all",
+          source: [
+            "Análisis-funcional-de-la-conducta-humana_-Concepto_-Froxán-Parga_-María-Xesús-2020-Ediciones-Pirámid.pdf",
+            "L_AnalisisConductualAplicado-2009.pdf",
+            "chance_paul_first_course_behavior_analysis_spanish_cap_1.pdf"
+          ]
         }),
       });
 

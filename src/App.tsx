@@ -13,6 +13,9 @@ import PlanSelection from "./pages/PlanSelection";
 import HomePage from "./pages/HomePage";
 import ABAPage from "./pages/ABAPage";
 import LearningMode from "./pages/LearningMode";
+import AlexithymiaPage from "./pages/AlexithymiaPage";
+import CovertPage from "./pages/CovertPage";
+import CaseExpertPage from "./pages/CaseExpertPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import NotFound from "./pages/NotFound";
@@ -84,7 +87,10 @@ const App = () => (
                 <Route path="/stats" element={<StatsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/aba" element={<ABAPage />} />
+                <Route path="/case-expert" element={<CaseExpertPage />} />
                 <Route path="/learning" element={<LearningMode />} />
+                <Route path="/alexithymia" element={<AlexithymiaPage />} />
+                <Route path="/covert" element={<CovertPage />} />
               </Route>
               
               <Route path="/chat" element={
