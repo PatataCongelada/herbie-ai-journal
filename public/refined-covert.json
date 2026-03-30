@@ -1,0 +1,147 @@
+{
+  "tool_name": "Condicionamiento Encubierto (Protocolo Cautela - 6 Pasos)",
+  "protocol_author": "Joseph R. Cautela",
+  "description": "El Condicionamiento Encubierto es una técnica de modificación de conducta que utiliza la imaginación para alterar la fuerza de una conducta. Implica la presentación encubierta de estímulos aversivos o reforzantes asociados con una conducta objetivo, con el fin de disminuir o aumentar su ocurrencia, respectivamente. Este protocolo consta de seis pasos rigurosos para su aplicación efectiva.",
+  "target_behaviors": [
+    "Reducción de conductas problemáticas (e.g., adicciones, ansiedad, tics, hábitos indeseados).",
+    "Aumento de conductas deseables (e.g., asertividad, estudio, interacción social).",
+    "Manejo de estados emocionales (e.g., ira, fobia)."
+  ],
+  "prerequisites": [
+    "Capacidad del cliente para generar y mantener imágenes mentales vívidas.",
+    "Motivación para el cambio.",
+    "Compromiso con la práctica entre sesiones.",
+    "Capacidad para seguir instrucciones verbales."
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "step_name": "Preparación y Relajación (RMP/Respiración Diafragmática)",
+      "type": "Preparación_Relajación",
+      "description": "Inducción a un estado de relajación profunda utilizando técnicas como la Relajación Muscular Progresiva (RMP) de Jacobson o la respiración diafragmática. Este paso es crucial para optimizar la capacidad de visualización y reducir la interferencia de la ansiedad, facilitando la inmersión en los escenarios encubiertos.",
+      "guidance_cues": [
+        "Instrucciones detalladas de tensar y relajar grupos musculares específicos, o de respiración abdominal lenta y profunda.",
+        "Énfasis en la atención a las sensaciones corporales de tensión y relajación.",
+        "Recordatorio de la importancia de un ambiente tranquilo y sin interrupciones."
+      ],
+      "client_actions": [
+        "Seguir las instrucciones del terapeuta para relajar el cuerpo y la mente.",
+        "Concentrarse en las sensaciones físicas.",
+        "Alcanzar un estado de calma y receptividad."
+      ],
+      "expected_outcome": "El cliente alcanza un estado de relajación física y mental que facilita la imaginería vívida y el enfoque en la tarea."
+    },
+    {
+      "step_number": 2,
+      "step_name": "Evaluación de Nitidez de Imágenes (Test Sensorial Encubierto)",
+      "type": "Evaluación_Diagnóstica",
+      "description": "Evaluación de la capacidad del cliente para crear imágenes mentales claras y vívidas a través de diferentes modalidades sensoriales (visual, auditiva, olfativa, gustativa, táctil, propioceptiva). Esto permite al terapeuta calibrar el nivel de detalle necesario en las descripciones y adaptar la técnica si la capacidad de imaginería es limitada.",
+      "guidance_cues": [
+        "Pedir al cliente que imagine objetos simples (e.g., una manzana, una campana, el olor a café) y que califique la nitidez y viveza de la imagen en una escala (e.g., 0-10).",
+        "Explorar todas las modalidades sensoriales relevantes para el objetivo terapéutico.",
+        "Proporcionar retroalimentación y alentar la práctica de la imaginería si es necesario."
+      ],
+      "client_actions": [
+        "Intentar generar las imágenes solicitadas con la mayor claridad posible.",
+        "Comunicar la viveza y el detalle de sus experiencias imaginadas."
+      ],
+      "expected_outcome": "El terapeuta obtiene una medida de la capacidad de imaginería del cliente; el cliente comprende la importancia de la viveza de las imágenes para el éxito del tratamiento."
+    },
+    {
+      "step_number": 3,
+      "step_name": "Identificación del Blanco Conductual (Meta/Conducta, Antecedentes, Consecuencias)",
+      "type": "Definición_Objetivo_Análisis_Funcional",
+      "description": "Definición operativa y exhaustiva de la conducta objetivo a modificar (problema o deseada), incluyendo los antecedentes específicos que la provocan y las consecuencias que la mantienen. Este análisis funcional es fundamental para el diseño de escenarios realistas y efectivos.",
+      "guidance_cues": [
+        "Utilizar preguntas específicas: '¿Qué haces/piensas/sientes exactamente?', '¿En qué situaciones o momentos específicos ocurre esto?', '¿Qué sucede inmediatamente después?', '¿Qué te gustaría hacer/sentir en su lugar?'.",
+        "Desglosar la conducta en términos observables y medibles.",
+        "Identificar la motivación y los reforzadores o castigos naturales asociados a la conducta."
+      ],
+      "client_actions": [
+        "Describir con detalle la conducta problema o deseada, sus disparadores y sus resultados.",
+        "Ser específico y proporcionar ejemplos concretos.",
+        "Confirmar la conducta objetivo para el tratamiento."
+      ],
+      "expected_outcome": "Una definición clara, concisa y operacionalizada de la conducta blanco, junto con sus antecedentes y consecuencias, acordada entre el terapeuta y el cliente."
+    },
+    {
+      "step_number": 4,
+      "step_name": "Diseño de Escenarios de Condicionamiento (Aversivo o Reforzante)",
+      "type": "Diseño_Intervención",
+      "description": "Creación conjunta de escenarios encubiertos individualizados y vívidos. Si el objetivo es reducir una conducta, se diseña un escenario aversivo donde la conducta indeseada lleva inmediatamente a una consecuencia desagradable (pero no traumática), seguida de alivio al evitarla. Si es aumentar una conducta, se diseña un escenario reforzante donde la conducta deseada es seguida por un reforzador altamente gratificante.",
+      "sub_steps": [
+        {
+          "name": "Diseño de Escenario Aversivo (Para Reducción)",
+          "description": "El cliente imagina vívidamente la situación desencadenante, realiza la conducta problema, e inmediatamente experimenta una consecuencia aversiva (e.g., náuseas, ansiedad, vergüenza pública). Luego, imagina detener la conducta o elegir una alternativa, experimentando un alivio inmediato de la aversión."
+        },
+        {
+          "name": "Diseño de Escenario de Reforzamiento (Para Aumento)",
+          "description": "El cliente imagina vívidamente la situación desencadenante, realiza la conducta deseada, e inmediatamente experimenta un reforzador positivo muy potente y personal (e.g., elogio, logro, recompensa tangible, sentimiento de orgullo)."
+        }
+      ],
+      "guidance_cues": [
+        "Para aversión: '¿Qué te resultaría lo suficientemente desagradable como para querer evitarlo, pero sin ser demasiado traumático?', '¿Cómo te sentirías al experimentar X?', '¿Qué sería un alivio inmediato?'.",
+        "Para reforzamiento: '¿Qué es lo que más te gustaría experimentar como recompensa por hacer esto?', '¿Cómo se vería, sonaría, sentiría ese refuerzo?'.",
+        "Asegurar que los escenarios sean muy específicos, sensorialmente ricos y creíbles para el cliente."
+      ],
+      "client_actions": [
+        "Colaborar activamente en la creación de los escenarios, aportando detalles personales y preferencias para los estímulos aversivos o reforzantes.",
+        "Visualizar mentalmente los borradores de los escenarios para asegurar su impacto emocional."
+      ],
+      "expected_outcome": "Uno o más escenarios encubiertos detallados, vívidos y personalmente relevantes, listos para ser ensayados, que asocian la conducta objetivo con una consecuencia específica."
+    },
+    {
+      "step_number": 5,
+      "step_name": "Entrenamiento de Ensayos Encubiertos (Ciclo Guiado de Repeticiones)",
+      "type": "Intervención_Entrenamiento",
+      "description": "El cliente es guiado a través de ciclos repetidos (típicamente 10-15 veces por sesión) de los escenarios encubiertos diseñados. El terapeuta narra o facilita la visualización, asegurando la inmersión, la viveza y la experiencia emocional de las consecuencias. Se busca establecer la asociación condicionada de manera robusta.",
+      "guidance_cues": [
+        "Instrucciones claras: 'Cierra los ojos...', 'Imagina vívidamente la situación...', 'Siente la emoción...', 'Ahora, cuando hagas X, esto es lo que sucede... Siente el desagrado/placer...', 'Y ahora, siente el alivio/recompensa'.",
+        "Pausas adecuadas para permitir la imaginería.",
+        "Reforzar la vivacidad y la implicación emocional del cliente.",
+        "Preguntas de verificación: '¿Qué tan vívido fue?', '¿Qué sentiste?'."
+      ],
+      "client_actions": [
+        "Activamente imaginar cada elemento del escenario con la mayor viveza posible.",
+        "Permitir la experiencia de las emociones asociadas a las consecuencias (aversivas o reforzantes).",
+        "Reportar al terapeuta sobre la calidad de la imaginería y las sensaciones experimentadas después de cada ensayo o ciclo."
+      ],
+      "expected_outcome": "El cliente experimenta repetidamente las consecuencias diseñadas para la conducta objetivo, comenzando a establecer una nueva asociación condicionada a nivel encubierto, lo que debilita o fortalece la tendencia a realizar la conducta."
+    },
+    {
+      "step_number": 6,
+      "step_name": "Plan de Generalización y Tareas para Casa",
+      "type": "Mantenimiento_Generalización_Tarea",
+      "description": "Desarrollo de un plan estructurado para que el cliente practique los ensayos encubiertos de forma independiente fuera de las sesiones. Esto incluye especificar la frecuencia, duración y situaciones para la práctica, así como estrategias para generalizar los cambios a contextos de la vida real. Se anticipan posibles obstáculos y se diseñan planes de contingencia.",
+      "sub_steps": [
+        {
+          "name": "Diseño de Tareas de Ensayos Encubiertos",
+          "description": "Definir cuántas veces al día/semana el cliente debe practicar, y en qué situaciones específicas debe imaginarse aplicando la técnica."
+        },
+        {
+          "name": "Registro y Auto-observación",
+          "description": "Instruir al cliente a llevar un registro de su práctica, la viveza de sus imágenes y cualquier cambio en la conducta objetivo o sus emociones."
+        },
+        {
+          "name": "Estrategias de Generalización",
+          "description": "Discutir cómo el cliente puede aplicar los principios del condicionamiento encubierto en situaciones de la vida real, 'practicando' antes de enfrentar desafíos."
+        },
+        {
+          "name": "Anticipación de Obstáculos y Contingencias",
+          "description": "Identificar posibles dificultades en la práctica y desarrollar soluciones o recordatorios para superarlas."
+        }
+      ],
+      "guidance_cues": [
+        "'En qué momentos del día podrías practicar esto?', '¿Qué te ayudaría a recordar tus tareas?', '¿Qué harías si la imagen no es lo suficientemente vívida en casa?', '¿Cómo podrías recompensarte por la práctica exitosa?'",
+        "Proporcionar hojas de registro o recordatorios."
+      ],
+      "client_actions": [
+        "Comprometerse con la práctica regular de los ensayos encubiertos.",
+        "Registrar sus experiencias y observar cambios.",
+        "Identificar y reportar desafíos y éxitos durante las siguientes sesiones."
+      ],
+      "expected_outcome": "El cliente integra la técnica en su rutina diaria, facilitando la generalización de los aprendizajes y el mantenimiento del cambio conductual a largo plazo, aumentando su autoeficacia en el manejo de la conducta objetivo."
+    }
+  ],
+  "notes": "La efectividad del condicionamiento encubierto depende en gran medida de la capacidad del cliente para la imaginería vívida y de la relevancia personal de los escenarios. El terapeuta debe ser flexible y adaptar los detalles a las necesidades individuales de cada cliente. La supervisión continua de la práctica y los ajustes son esenciales."
+}
