@@ -6,10 +6,14 @@ import { toast } from "sonner";
 import { ToolDesign, generateDesignPdf } from "@/lib/generateDesignPdf";
 
 const AVAILABLE_MANUALS = [
-  { label: "Todos los manuales", value: "" },
-  { label: "Covert Conditioning Handbook (Cautela)", value: "Covert_Conditioning_Handbook.pdf" },
+  { label: "Todo el conocimiento de Herbie", value: "" },
+  { label: "Activación Conductual (Lejuez & Hopko)", value: "Activación conductual Lejuez Hopko.pdf" },
+  { label: "Análisis Conductual Aplicado (Cooper)", value: "L_AnalisisConductualAplicado-2009.pdf" },
+  { label: "Análisis Funcional (Froxán Parga/Pirámide)", value: "Análisis-funcional-de-la-conducta-humana_-Concepto_-Froxán-Parga_-María-Xesús-2020-Ediciones-Pirámid.pdf" },
+  { label: "Condicionamiento Encubierto (Cautela)", value: "Covert_Conditioning_Handbook.pdf" },
+  { label: "Modificación de Conducta (Principios/Técnicas)", value: "modificacion de conducta que es y como aplicarla.pdf" },
+  { label: "Técnicas de Modificación de Conducta", value: "tecnicas-de-modificacion-de-conducta_compress.pdf" },
   { label: "ABA — Tratamiento basado en evidencia", value: "Tratamiento-basado-ABA.Guia-de-practica-clinica.pdf" },
-  { label: "Modificación de Conducta", value: "modificacion de conducta que es y como aplicarla.pdf" },
 ];
 
 const ArchitectPage = () => {
