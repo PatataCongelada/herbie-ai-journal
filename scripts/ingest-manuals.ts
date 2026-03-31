@@ -6,7 +6,9 @@ import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as dotenv from 'dotenv';
 
-dotenv.config();
+// Load .env.local first (overrides), then .env as fallback
+dotenv.config({ path: '.env.local', override: true });
+dotenv.config({ path: '.env' });
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -19,11 +21,8 @@ if (!supabaseUrl || !supabaseKey || !geminiKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 const genAI = new GoogleGenerativeAI(geminiKey);
-const model = genAI.getGenerativeModel({ 
-  model: "gemini-2.0-flash",
-  systemInstruction: "" // Se actualizará en cada request
-});
-const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-2-preview" });
+// gemini-embedding-001 is stable, available and supports batchEmbedContents with outputDimensionality
+const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-001" });
 
 const MANUALS_DIR = './docs/manuals';
 let totalProcessedInRun = 0;
@@ -110,20 +109,22 @@ async function ingest() {
 
         while (retryCount < maxRetries && !success) {
           try {
-            console.log(`📡 Enviando lote de ${validBatch.length} fragmentos (Progreso: ${i}/${chunks.length})...`);
+            console.log(`📡 Procesando fragmentos ${i} a ${i + BATCH_SIZE} (${i}/${chunks.length})...`);
             
-            // 1. Obtener embeddings en lote
-            const result = await embeddingModel.batchEmbedContents({
-              requests: validBatch.map(text => ({
-                content: { role: 'user', parts: [{ text }] },
+            // Embed individualmente — más lento pero funciona con todos los planes de API
+            const embeddings: number[][] = [];
+            for (const chunk of validBatch) {
+              const result = await embeddingModel.embedContent({
+                content: { role: 'user', parts: [{ text: chunk }] },
                 // @ts-ignore
                 outputDimensionality: 768
-              }))
-            });
+              });
+              embeddings.push(result.embedding.values);
+              // Pequeña pausa entre embeds para respetar TPM
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
 
-            const embeddings = result.embeddings.map(e => e.values);
-
-            // 2. Insertar en Supabase en lote
+            // Insertar en Supabase en lote
             const rows = validBatch.map((chunk, index) => ({
               content: chunk,
               embedding: embeddings[index],
@@ -144,15 +145,15 @@ async function ingest() {
             if (error) throw error;
             
             totalProcessedInRun += validBatch.length;
-            console.log(`✅ Lote completado. total procesado en esta sesión: ${totalProcessedInRun}/${MAX_FRAGMENTS_PER_RUN}`);
+            console.log(`✅ Lote completado. Total procesado en esta sesión: ${totalProcessedInRun}/${MAX_FRAGMENTS_PER_RUN}`);
 
             if (totalProcessedInRun >= MAX_FRAGMENTS_PER_RUN) {
               throw new Error('RUN_LIMIT_REACHED');
             }
             
             success = true;
-            // Un respiro de 5s para ser muy conservadores con los límites TPM/RPM gratuitos
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            // Pausa entre lotes
+            await new Promise(resolve => setTimeout(resolve, 2000));
           } catch (err: any) {
             retryCount++;
             const errorMessage = err.message?.toLowerCase() || "";
