@@ -19,7 +19,7 @@ const AVAILABLE_MANUALS = [
 const ArchitectPage = () => {
   const navigate = useNavigate();
   const [topic, setTopic] = useState("");
-  const [source, setSource] = useState("");
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [design, setDesign] = useState<ToolDesign | null>(null);
   const [meta, setMeta] = useState<any>(null);
@@ -36,7 +36,10 @@ const ArchitectPage = () => {
       const response = await fetch("/api/architect-brief", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: topic.trim(), source: source || undefined }),
+        body: JSON.stringify({ 
+          topic: topic.trim(), 
+          source: selectedSources.length > 0 ? selectedSources : undefined 
+        }),
       });
 
       const data = await response.json();
@@ -125,17 +128,42 @@ const ArchitectPage = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-violet-500 px-1">Manual de Referencia</label>
-              <select
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-                className="w-full bg-card border border-border/50 rounded-2xl px-4 h-12 text-sm font-medium outline-none shadow-sm focus:ring-2 ring-violet-500/20 cursor-pointer"
-              >
-                {AVAILABLE_MANUALS.map(m => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
-                ))}
-              </select>
+<div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-violet-500 px-1">Manuales de Referencia</label>
+              <div className="flex flex-wrap gap-2">
+                {/* Special Toggle for "All" */}
+                <button
+                  onClick={() => setSelectedSources([])}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    selectedSources.length === 0
+                      ? "bg-violet-500 text-white shadow-lg shadow-violet-500/20"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  🌐 Todo el conocimiento
+                </button>
+                
+                {AVAILABLE_MANUALS.slice(1).map(m => {
+                  const isSelected = selectedSources.includes(m.value);
+                  return (
+                    <button
+                      key={m.value}
+                      onClick={() => {
+                        setSelectedSources(prev => 
+                          isSelected ? prev.filter(s => s !== m.value) : [...prev, m.value]
+                        );
+                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        isSelected
+                          ? "bg-violet-500/10 border-violet-500 text-violet-600"
+                          : "bg-card border-border/50 text-muted-foreground hover:border-violet-500/30"
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <button
