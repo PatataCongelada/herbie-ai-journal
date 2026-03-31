@@ -4,8 +4,8 @@ import path from 'path';
 import pdf from 'pdf-parse/lib/pdf-parse.js';
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
-
-dotenv.config();
+dotenv.config({ path: '.env.local', override: true });
+dotenv.config({ path: '.env' });
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -55,10 +55,12 @@ async function checkStatus() {
         expectedChunks++;
       }
 
+      const posixPath = relativePath.split(path.sep).join('/');
+
       const { count: existingCount } = await supabase
         .from('manual_knowledge')
         .select('id', { count: 'exact', head: true })
-        .filter('metadata->>full_path', 'eq', relativePath);
+        .filter('metadata->>full_path', 'eq', posixPath);
 
       const progress = ((existingCount || 0) / expectedChunks) * 100;
       const status = progress >= 100 ? '✅ Completado' : progress > 0 ? '⏳ En proceso' : '❌ Pendiente';

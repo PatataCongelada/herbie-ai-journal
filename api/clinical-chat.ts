@@ -16,7 +16,7 @@ const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash",
   systemInstruction: "" // Se actualizará en cada request
 });
-const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-001" });
 
 async function getClinicalContext(query: string, category: string, expert: string, source?: string): Promise<string> {
   try {

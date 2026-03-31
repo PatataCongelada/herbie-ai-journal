@@ -8,7 +8,7 @@ const geminiApiKey = process.env.GOOGLE_GEMINI_API_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
-const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+const embeddingModel = genAI.getGenerativeModel({ model: "models/gemini-embedding-001" });
 
 async function getManualContext(topic: string, source?: string): Promise<{ context: string; sources: string[] }> {
   try {
@@ -34,7 +34,7 @@ async function getManualContext(topic: string, source?: string): Promise<{ conte
       if (srcFiltered.length > 0) filtered = srcFiltered;
     }
 
-    const usedSources = [...new Set(filtered.map((m: any) => m.metadata?.source || 'Manual clínico'))];
+    const usedSources = [...new Set(filtered.map((m: any) => m.metadata?.source || 'Manual clínico'))] as string[];
     const context = filtered.slice(0, 10).map((m: any) => `[${m.metadata?.source || 'Manual'}] ${m.content}`).join("\n\n");
     return { context, sources: usedSources };
   } catch (err) {
