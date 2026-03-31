@@ -27,6 +27,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // Restore key from sessionStorage if it exists
+      const savedKey = sessionStorage.getItem('herbie_clinical_key');
+      if (savedKey) {
+        setEncryptionKey(savedKey);
+      }
+      
       setIsLoading(false);
     });
 
@@ -35,7 +42,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSession(session);
       setUser(session?.user ?? null);
       if (!session) {
-        setEncryptionKey(null); // Clear key on logout
+        setEncryptionKey(null); 
+        sessionStorage.removeItem('herbie_clinical_key');
       }
     });
 
@@ -43,10 +51,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const setKey = (password: string) => {
-    // In a real E2EE system, we would use something more complex, 
-    // but for this MVP, we use the password directly as the source for the crypto utility.
-    // The crypto utility itself performs the PBKDF2 derivation.
     setEncryptionKey(password);
+    sessionStorage.setItem('herbie_clinical_key', password);
   };
 
   const signIn = async (email: string, password: string) => {

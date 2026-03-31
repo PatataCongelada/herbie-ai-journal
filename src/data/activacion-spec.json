@@ -1,0 +1,161 @@
+{
+  "tool_name": "Activación Conductual: Tu Guía para el Bienestar",
+  "manual_source": "Lejuez, C. W., Hopko, D. R., & Hopko, S. D. (2001). A brief behavioral activation treatment for depression. Clinical Psychology: Science and Practice, 8(1), 71-75. / Martell, C. R., Addis, M. E., & Jacobson, N. S. (2001). Depression in context: Strategies for guided action. Guilford Press.",
+  "protocol_overview": "Este protocolo de Activación Conductual (AC) es una intervención psicológica estructurada y basada en la evidencia, diseñada para tratar la depresión y la baja activación. Se fundamenta en la premisa de que la evitación y la inactividad, que a menudo acompañan a los estados depresivos, perpetúan el ciclo del bajo estado de ánimo. Al revertir estos patrones, la AC busca aumentar la exposición a fuentes de refuerzo positivo en el entorno del individuo, mejorando así su estado de ánimo y su funcionamiento general.\n\nEl programa guía al usuario a través de la identificación de sus valores personales, el monitoreo de sus actividades actuales y su impacto en el estado de ánimo, y la programación sistemática de actividades placenteras y de logro. Se enfoca en superar las barreras conductuales y cognitivas que impiden la participación en estas actividades, fomentando la acción en lugar de la rumia o la evitación. Finalmente, se establecen estrategias para mantener los avances y prevenir recaídas, construyendo un repertorio de conductas saludables y reforzantes.",
+  "prerequisites": [
+    "Comprensión básica de la relación entre la actividad y el estado de ánimo.",
+    "Disposición a registrar actividades y emociones de forma regular.",
+    "Compromiso con la experimentación de nuevas conductas, incluso frente a la falta de motivación inicial."
+  ],
+  "target_behaviors": [
+    "Aumento de la participación en actividades placenteras y de logro.",
+    "Reducción de la evitación conductual y la rumiación.",
+    "Mejora del estado de ánimo general y reducción de síntomas depresivos.",
+    "Aumento de la sensación de control y autoeficacia."
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "name": "Explorando la AC y Tu Estado Actual",
+      "description": "Introducción a la Activación Conductual (AC), sus principios y el propósito de las actividades. Evaluación inicial del estado de ánimo, energía y nivel de activación.",
+      "user_prompt": "Comprendamos cómo las actividades influyen en tu bienestar y evaluemos tu punto de partida para este viaje de activación.",
+      "bot_guidance": "¡Hola! Estoy aquí para acompañarte en este proceso de Activación Conductual. Para comenzar, es importante que entiendas cómo lo que hacemos afecta cómo nos sentimos. Te invito a reflexionar sobre ello y a registrar cómo te sientes en este momento. Esta será nuestra línea base para medir tu progreso.",
+      "fields": [
+        {
+          "name": "understanding_ac_reflection",
+          "label": "¿Qué crees que significa que nuestras actividades influyen en nuestro estado de ánimo?",
+          "type": "textarea",
+          "placeholder": "Reflexiona brevemente sobre la conexión entre tus acciones y tus emociones.",
+          "required": true,
+          "clinical_rationale": "Permite al usuario una psicoeducación inicial y la elaboración de la hipótesis conductual-afectiva, esencial para la adherencia al tratamiento."
+        },
+        {
+          "name": "initial_mood_suds",
+          "label": "¿Cómo describirías tu estado de ánimo general ahora mismo? (0 = muy bajo, 100 = excelente)",
+          "type": "slider",
+          "min": 0,
+          "max": 100,
+          "required": true,
+          "clinical_rationale": "Medición cuantitativa del estado de ánimo inicial (Subjective Units of Distress Scale - SUDS adaptado), sirviendo como línea base para la evaluación de la eficacia de la intervención."
+        }
+      ]
+    },
+    {
+      "step_number": 2,
+      "name": "Identificando Valores y Monitoreando Actividades",
+      "description": "El usuario identificará sus valores personales (áreas de vida importantes) y comenzará a registrar sus actividades diarias, junto con el placer y el logro experimentados.",
+      "user_prompt": "Conecta tus actividades con aquello que es más importante para ti y observa cómo te sientes al realizarlas.",
+      "bot_guidance": "Ahora que conocemos tu punto de partida, vamos a explorar qué es realmente significativo para ti. Identificar tus valores nos ayudará a elegir actividades que te refuercen. Luego, te pediré que monitorees tus actividades diarias. Registrar cómo te sientes después de cada actividad es crucial para entender mejor la relación entre lo que haces y tu estado de ánimo.",
+      "fields": [
+        {
+          "name": "core_values_selection",
+          "label": "¿Cuáles de estas áreas de vida son importantes para ti? (Puedes seleccionar varias)",
+          "type": "checkbox",
+          "options": [
+            "Familia y relaciones cercanas",
+            "Amistades y vida social",
+            "Trabajo y carrera",
+            "Estudios y desarrollo personal",
+            "Salud y bienestar físico",
+            "Recreación y ocio",
+            "Espiritualidad",
+            "Contribución a la comunidad"
+          ],
+          "required": true,
+          "clinical_rationale": "La identificación de valores proporciona una brújula para la selección de actividades significativas."
+        }
+      ]
+    },
+    {
+      "step_number": 3,
+      "name": "Planificando Actividades para el Bienestar",
+      "description": "Basándose en los valores y el monitoreo, el usuario programará actividades específicas (de placer y logro) para la próxima semana.",
+      "user_prompt": "Es hora de crear tu plan de acción. Elige actividades que te acerquen a tus valores y programa cuándo y cómo las realizarás.",
+      "bot_guidance": "Excelente. Con la información de tus valores y el registro de actividades, ahora vamos a planificar proactivamente. Piensa en actividades que te aporten placer o un sentido de logro y que estén alineadas con tus valores. Es importante que sean específicas y realistas.",
+      "fields": [
+        {
+          "name": "scheduled_activity_name",
+          "label": "Nombre de la actividad que quieres programar:",
+          "type": "text",
+          "placeholder": "Ej: Llamar a mi hermana, salir a caminar 20 min.",
+          "required": true,
+          "clinical_rationale": "Especificación de la conducta objetivo a programar."
+        },
+        {
+          "name": "scheduled_activity_type",
+          "label": "¿Esta actividad es principalmente de...?",
+          "type": "radio",
+          "options": ["Placer", "Logro", "Necesidad"],
+          "required": true,
+          "clinical_rationale": "Clasificación de la actividad para asegurar un balance adecuado de reforzadores."
+        }
+      ]
+    },
+    {
+      "step_number": 4,
+      "name": "Superando Obstáculos y Desafíos",
+      "description": "Abordar las barreras identificadas o experimentadas para la realización de las actividades programadas, a través de estrategias de resolución de problemas.",
+      "user_prompt": "Es normal enfrentar desafíos. Juntos, identifiquemos las barreras y busquemos soluciones creativas.",
+      "bot_guidance": "¡Excelente! Has dado un paso importante al planificar. Sin embargo, sabemos que pueden surgir obstáculos. Pensemos juntos en qué te impide actuar y cómo podemos superar esas dificultades.",
+      "fields": [
+        {
+          "name": "identified_barrier_textarea",
+          "label": "Describe un obstáculo que hayas encontrado o preveas:",
+          "type": "textarea",
+          "placeholder": "Ej: Sentí demasiada pereza; el plan era muy ambicioso.",
+          "required": true,
+          "clinical_rationale": "Registro de la barrera específica para abordarla sistemáticamente."
+        }
+      ]
+    },
+    {
+      "step_number": 5,
+      "name": "Revisión y Reforzamiento de Logros",
+      "description": "Revisar las actividades programadas y realizadas, comparar expectativas con la realidad, y reforzar los logros obtenidos.",
+      "user_prompt": "Es momento de mirar atrás, celebrar lo que has logrado y reflexionar sobre lo que has aprendido.",
+      "bot_guidance": "¡Felicidades por tu esfuerzo! Vamos a revisar tus actividades programadas, compararlas con lo que realmente hiciste y reconocer cómo esto impacta en tu bienestar.",
+      "fields": [
+        {
+          "name": "was_activity_completed",
+          "label": "¿Completaste la actividad según lo planeado?",
+          "type": "radio",
+          "options": ["Sí, completamente", "Parcialmente", "No"],
+          "required": true,
+          "clinical_rationale": "Evalúa la adherencia al plan y sirve como base para la reflexión."
+        }
+      ]
+    },
+    {
+      "step_number": 6,
+      "name": "Plan de Mantenimiento y Prevención de Recaídas",
+      "description": "Consolidar las estrategias aprendidas y desarrollar un plan para mantener los logros a largo plazo.",
+      "user_prompt": "Has logrado mucho. Ahora, vamos a asegurarnos de que estas herramientas te acompañen en el futuro.",
+      "bot_guidance": "¡Hemos llegado a un punto importante! Es crucial que lo que has aprendido se mantenga en tu vida diaria. Identifiquemos esas actividades 'ganadoras' y cómo puedes integrarlas continuamente.",
+      "fields": [
+        {
+          "name": "early_warning_signs",
+          "label": "¿Cuáles podrían ser las primeras señales de que tu ánimo empieza a decaer?",
+          "type": "textarea",
+          "placeholder": "Ej: Dormir más, aislamiento...",
+          "required": true,
+          "clinical_rationale": "Entrenamiento en el reconocimiento de señales de alerta temprana."
+        }
+      ]
+    }
+  ],
+  "clinical_basis": [
+    "\"The underlying principle of behavioral activation is that changes in activity... can lead to improvements in mood.\" (Lejuez, Hopko, & Hopko, 2001, p. 71)",
+    "\"Treatment emphasizes the importance of increasing pleasant and mastery activities.\" (Martell, Addis, & Jacobson, 2001, p. 34)"
+  ],
+  "auto_registros_schema": {
+    "description": "Registro automático de métricas clave del protocolo de AC.",
+    "key_metrics": [
+      "initial_mood_suds",
+      "mood_after_activity_suds",
+      "pleasure_after_activity_suds",
+      "mastery_after_activity_suds",
+      "activity_duration_minutes",
+      "activity_log_date"
+    ]
+  }
+}

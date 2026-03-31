@@ -54,6 +54,7 @@ const ArchitectPage = () => {
 
       setDesign(data.design);
       setMeta(data.meta);
+      (window as any).lastGeneratedDesign = data.design;
       setExpandedSteps([0]); // Open first step
       toast.success("¡Especificación generada correctamente!");
     } catch (error: any) {
